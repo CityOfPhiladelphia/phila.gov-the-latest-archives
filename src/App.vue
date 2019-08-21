@@ -7,7 +7,7 @@
           v-model="searchedValue"
           class="search-field"
           type="text"
-          placeholder="Search by title or department"
+          placeholder="Search by title, department, or keyword"
           @keyup.enter="filterPosts();"
         ><input
           ref="archive-search-bar"
@@ -72,7 +72,7 @@
             @closed="filterPosts()"
           />
         </div>
-        <div class="cell medium-9 small-24 auto filter-by-owner">
+        <div class="cell medium-11 small-24 auto filter-by-owner">
           <v-select
             ref="categorySelect"
             v-model="selectedCategory"
@@ -82,7 +82,7 @@
             @input="filterPosts()"
           />
         </div>
-        <div class="cell medium-6 small-24">
+        <div class="cell medium-4 small-24">
           <a
             class="button content-type-featured full"
             @click="clearAllFilters()"
@@ -268,9 +268,9 @@ export default {
       },
       templates: {
         featured: "Featured",
+         post: "Posts",
         action_guide: "Action guides",
         press_release: "Press releases",
-        post: "Posts",
       },
     };
   },
@@ -345,7 +345,10 @@ export default {
 
         if (end < start) {
           console.log('error');
+          this.failure = true;
+          this.filteredPosts = [];
         } else {
+          this.failure = false;
           this.datedPosts = [];
           this.searchPosts.forEach((post) => {
             let postDate = moment(post.date).unix();
@@ -384,11 +387,12 @@ export default {
     filterByPostType: function() {
       if (this.checkedTemplates.length !== 0) {
         this.templatePosts = [];
-        for (var i = 0; i < this.checkedTemplates.length; ++i) {
-          this.$search(this.checkedTemplates[i], this.categoryPosts, this.templateOptions).then(posts => {
-            this.templatePosts = this.templatePosts.concat(posts);
-          });
-        }
+        this.categoryPosts.forEach((post) => {
+          let postType = post.template;
+          if (this.checkedTemplates.includes(postType)) {
+            this.templatePosts.push(post);
+          }
+        });
       } else {
         this.templatePosts = this.categoryPosts;
       } 
@@ -417,6 +421,7 @@ export default {
       this.state.startDate = '';
       this.state.endDate = '';
       this.selectedCategory = '';
+      this.failure = false;
 
       this.filteredPosts = this.posts;
     },
@@ -472,9 +477,9 @@ tr td:last-child {
   padding: 0 0 0 9px;
   width: 30px;
   height:100%;
+  fill: #0f4d90;
   
 }
-
 
 .v-select .vs__actions{
   padding:0 5px 0 0;
@@ -483,13 +488,15 @@ tr td:last-child {
 
 .v-select .vs__search {
  color: #a1a1a1;
-
 }
 
 .vs__clear:hover {
   background-color: transparent;
-  /* fill: red !important; */
 }
+
+/* .vs__clear {
+  fill: black;
+} */
 
 .v-select .vs__dropdown-toggle{
   border-radius: 0;
@@ -515,23 +522,7 @@ tr td:last-child {
 }
 .filter-by-owner ul.vs__dropdown-menu li{
   border-bottom: 1px solid #f0f0f0;
-
-}
-.filter-by-owner ul.vs__dropdown-menu li a{
-  color: #0f4d90;
-  padding:1rem;
-}
-.filter-by-owner ul.vs__dropdown-menu li a:hover{
-  background: #0f4d90;
-  color:white;
-}
-.filter-by-owner .v-select .vs__dropdown-menu > .highlight > a {
-  background: #0f4d90;
-  color: white;
-}
-.filter-by-owner .v-select.single .vs__selected{
-  background-color: #f0f0f0;
-  border: none;
+  padding: 15px 0 15px 10px;
 }
 
 .vdp-datepicker [type='text'] {
@@ -543,8 +534,13 @@ tr td:last-child {
 }
 #archive-results .vdp-datepicker__calendar .cell.selected,
 #archive-results .vdp-datepicker__calendar .cell.selected.highlighted,
-#archive-results .vdp-datepicker__calendar .cell.selected:hover{
+#archive-results .vdp-datepicker__calendar .cell.selected:hover {
   background: #25cef7;
+}
+
+.vs__dropdown-option--highlight.vs__dropdown-option{
+  background: #0f4d90;
+  color: white;
 }
 
 

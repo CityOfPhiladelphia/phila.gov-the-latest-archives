@@ -51,7 +51,7 @@
       <div class="grid-x grid-margin-x">
         <div class="cell medium-4 small-11">
           <datepicker
-            v-model="state.startDate"
+            v-model="startDate"
             name="startDate"
             placeholder="Start date"
             format="MMM. dd, yyyy"
@@ -64,7 +64,7 @@
         </div>
         <div class="cell medium-4 small-11">
           <datepicker
-            v-model="state.endDate"
+            v-model="endDate"
             name="endDate"
             placeholder="End date"
             format="MMM. dd, yyyy"
@@ -132,6 +132,7 @@
             </th><th class="date">
               Publish date
             </th><th>Department</th>
+            <th> Post Type</th>
           </tr>
         </thead>
         <paginate 
@@ -166,6 +167,9 @@
                 <span>{{ category.slang_name }}</span><span v-if="i < post.categories.length - 1">,&nbsp;</span>
               </span>
             </td>
+            <td>
+              {{ post.template | formatTemplate }}
+            </td>
           </tr>
         </paginate>
       </table>
@@ -196,6 +200,9 @@ import VueFuse from "vue-fuse";
 import Datepicker from 'vuejs-datepicker';
 import 'vue-select/dist/vue-select.css';
 
+Vue.use(VuePaginate);
+Vue.use(VueFuse);
+Vue.component('v-select', vSelect);
 // import vmodal from 'vue-js-modal';
 
 const endpoint =
@@ -211,6 +218,17 @@ export default {
         return moment(String(value)).format('MMM. DD, YYYY');
       }
     },
+    'formatTemplate': function(value) {
+      if (value === "action_guide") {
+        return "Action Guide"
+      } else if (value === "post") {
+        return "Post"
+      } else if (value === "featured") {
+        return "Featured"
+      } else if (value === "press_release") {
+        return "Press Release"
+      }
+    }
   },
   data: function() {
     return {
@@ -233,10 +251,11 @@ export default {
       loading: false,
       emptyResponse: false,
       failure: false,
+
+      startDate: '',
+      endDate: '',
       
       state: {
-        startDate: '',
-        endDate: '',
         disabled: false,
       },
       
@@ -268,18 +287,64 @@ export default {
       },
       templates: {
         featured: "Featured",
-         post: "Posts",
+        post: "Posts",
         action_guide: "Action guides",
         press_release: "Press releases",
       },
+
+      routerQuery: {},
     };
   },
   computed: { 
 
   },
-  mounted: function() {
-    this.getAllPosts();
-    this.getAllCategories();
+
+  watch: {
+    searchedValue (value) {
+      if (value.length > 5) { //wrong if -- wait until the search has been executed -> how?
+        this.updateRouterQuery('searchedValue', value);
+      }
+    },
+
+    selectedCategory (value) {
+    
+      this.updateRouterQuery('selectedCategory', value);
+     
+    },
+
+    checkedTemplates (value) {
+      this.updateRouterQuery('checkedTemplates', value);
+    },
+
+    startDate (value) {
+      if (value) {
+        this.updateRouterQuery('startDate',  moment(value).unix());
+      }
+    },
+
+    endDate (value) {
+      if (value) {
+        this.updateRouterQuery('endDate', moment(value).unix());
+      }
+    },
+
+    routerQuery: {
+      handler: function () {
+        this.updateRouter();
+      },
+      deep: true,
+    },
+
+  },
+  created: async function() {
+    await this.getAllPosts();
+    await this.getAllCategories();
+    this.filterPosts;
+  },
+
+  mounted :  function() {
+    this.init();
+    this.filterPosts();
   },
   
   methods: {
@@ -338,10 +403,10 @@ export default {
     },
 
     filterByDate: function () {
-      if ((this.state.startDate !== "" ) && (this.state.endDate !== "")) {
+      if ((this.startDate !== "" ) && (this.endDate !== "")) {
         
-        let start = moment(this.state.startDate).unix();
-        let end = moment(this.state.endDate).unix();
+        let start = moment(this.startDate).unix();
+        let end = moment(this.endDate).unix();
 
         if (end < start) {
           console.log('error');
@@ -418,16 +483,52 @@ export default {
     clearAllFilters: function () {
       this.searchedValue = '';
       this.checkedTemplates = [];
-      this.state.startDate = '';
-      this.state.endDate = '';
+      this.startDate = '';
+      this.endDate = '';
       this.selectedCategory = '';
       this.failure = false;
+      this.resetRouterQuery();
 
       this.filteredPosts = this.posts;
     },
+
+
     onSubmit: function() {},
     goToPost: function(link) {
       window.location.href = link;
+    },
+
+    init : function() {
+      if (Object.keys(this.$route.query).length !== 0) {
+      console.log("routing from url")
+
+       for (let key in this.$route.query) {
+          Vue.set(this, key, this.$route.query[key]);
+        }
+      }
+
+    },
+
+    updateRouterQuery: function (key, value) {
+      if (typeof value === 'undefined' || value === "" || value === null || value === NaN) {
+        Vue.delete(this.routerQuery, key);
+      } else {
+        Vue.set(this.routerQuery, key, value);
+      
+      }
+    },
+
+    resetRouterQuery: function () {
+      for (let key in this.$route.query) {
+        Vue.delete(this.routerQuery, key);
+      }
+    },
+
+    updateRouter: function () {
+      this.$router.push({
+        name: 'main',
+        query: this.routerQuery,
+      });
     },
   },
 };

@@ -1,6 +1,3 @@
-import BrowserSupport from './assets/browser-support.js';
-BrowserSupport.isIE10();
-
 import Vue from 'vue';
 import App from './App.vue';
 import VueRouter from 'vue-router';

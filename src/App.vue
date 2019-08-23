@@ -330,16 +330,11 @@ export default {
 
   },
 
-  created: async function() {
-    await this.getAllPosts();
-    await this.getAllCategories();
-    await this.init();
+  created:  function() {
+    this.getAllPosts();
+    this.getAllCategories();
   },
 
-  mounted : async function() {
-    this.filterPosts();
-  },
-  
   methods: {
     getAllPosts: function() {
       {
@@ -353,7 +348,11 @@ export default {
             this.posts = response.data;
             this.filteredPosts = response.data;
             this.successfulResponse;
+            
             this.getDropdownCategories();
+            this.initFilters();
+            this.filterPosts();
+            
           })
           .catch(e => {
             this.failure = true;
@@ -445,6 +444,8 @@ export default {
 
     filterByPostType: function() {
       if (this.checkedTemplates.length !== 0) {
+        console.log("filtering by post type");
+        console.log(this.filteredPosts);
         this.templatePosts = [];
         this.categoryPosts.forEach((post) => {
           let postType = post.template;
@@ -467,6 +468,7 @@ export default {
     },
 
     filterPosts: async function () {
+      console.log("filtering posts");
       await this.filterByDepartment();
       await this.filterByPostType();
       await this.filterBySearch();
@@ -499,7 +501,7 @@ export default {
       window.location.href = link;
     },
 
-    init : function() {
+    initFilters :  async function() {
       if (Object.keys(this.$route.query).length !== 0) {
         console.log("routing from url");
 

@@ -184,13 +184,14 @@
           next: 'Older',
           prev: 'Newer'
         }"
+        @change="scrollToTop"
       />
     </div>
-  </div>
-  <!-- v if loading shw spinny boy -->
+  </div> 
 </template>
 
 <script>
+
 import Vue from "vue";
 import axios from "axios";
 import moment from "moment";
@@ -203,7 +204,6 @@ import 'vue-select/dist/vue-select.css';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 Vue.component('v-select', vSelect);
-// import vmodal from 'vue-js-modal';
 
 const endpoint =
   "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
@@ -248,7 +248,7 @@ export default {
       endpointCategoriesSlang: [],
       
       paginate: [ "filteredPosts" ],
-      loading: false,
+      loading: true,
       emptyResponse: false,
       failure: false,
 
@@ -346,13 +346,10 @@ export default {
           })
           .then(response => {
             this.posts = response.data;
-            this.filteredPosts = response.data;
-            this.successfulResponse;
-            
             this.getDropdownCategories();
             this.initFilters();
             this.filterPosts();
-            
+            this.loading = false;
           })
           .catch(e => {
             this.failure = true;
@@ -402,7 +399,6 @@ export default {
         let end = moment(this.endDate).unix();
 
         if (end < start) {
-          console.log('error');
           this.failure = true;
           this.filteredPosts = [];
         } else {
@@ -444,8 +440,6 @@ export default {
 
     filterByPostType: function() {
       if (this.checkedTemplates.length !== 0) {
-        console.log("filtering by post type");
-        console.log(this.filteredPosts);
         this.templatePosts = [];
         this.categoryPosts.forEach((post) => {
           let postType = post.template;
@@ -468,7 +462,6 @@ export default {
     },
 
     filterPosts: async function () {
-      console.log("filtering posts");
       await this.filterByDepartment();
       await this.filterByPostType();
       await this.filterBySearch();
@@ -477,7 +470,6 @@ export default {
     },
 
     searchFilter: async function() {
-  
       await this.filterPosts();
       await this.updateRouterQuery('searchedValue', this.searchedValue);
       
@@ -495,15 +487,12 @@ export default {
       this.filteredPosts = this.posts;
     },
 
-
-    onSubmit: function() {},
     goToPost: function(link) {
       window.location.href = link;
     },
 
-    initFilters :  async function() {
+    initFilters :   function() {
       if (Object.keys(this.$route.query).length !== 0) {
-        console.log("routing from url");
 
         for (let key in this.$route.query) {
           if(key === "checkedTemplates"){
@@ -513,7 +502,6 @@ export default {
             let value = this.$route.query[key];
 
             value = moment.unix(value).format("MMM. DD, YYYY");
-            console.log(value);
             Vue.set(this, key, value);
           
           }else {
@@ -541,6 +529,13 @@ export default {
         Vue.set(this.routerQuery, key, value);
       
       }
+    },
+
+    scrollToTop () {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
     },
 
     resetRouterQuery: function () {

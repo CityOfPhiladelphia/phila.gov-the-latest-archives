@@ -8,13 +8,13 @@
           class="search-field"
           type="text"
           placeholder="Search by title, department, or keyword"
-          @keyup.enter="filterPosts();"
+          @keyup.enter="searchFilter();"
         ><input
           ref="archive-search-bar"
           type="submit"
           class="search-submit"
           value="Search"
-          @click="filterPosts();"
+          @click="searchFilter();"
         >
       </div>
     </fieldset>
@@ -220,15 +220,15 @@ export default {
     },
     'formatTemplate': function(value) {
       if (value === "action_guide") {
-        return "Action Guide"
+        return "Action Guide";
       } else if (value === "post") {
-        return "Post"
+        return "Post";
       } else if (value === "featured") {
-        return "Featured"
+        return "Featured";
       } else if (value === "press_release") {
-        return "Press Release"
+        return "Press Release";
       }
-    }
+    },
   },
   data: function() {
     return {
@@ -300,16 +300,9 @@ export default {
   },
 
   watch: {
-    searchedValue (value) {
-      if (value.length > 5) { //wrong if -- wait until the search has been executed -> how?
-        this.updateRouterQuery('searchedValue', value);
-      }
-    },
 
     selectedCategory (value) {
-    
       this.updateRouterQuery('selectedCategory', value);
-     
     },
 
     checkedTemplates (value) {
@@ -336,14 +329,14 @@ export default {
     },
 
   },
+
   created: async function() {
     await this.getAllPosts();
     await this.getAllCategories();
-    this.filterPosts;
+    await this.init();
   },
 
-  mounted :  function() {
-    this.init();
+  mounted : async function() {
     this.filterPosts();
   },
   
@@ -386,7 +379,9 @@ export default {
       this.posts.forEach((post) => {
         post.categories.forEach((category) => {
           let newCategory = category.slang_name;
-          this.categories.push(newCategory);
+          if (newCategory !== "") {
+            this.categories.push(newCategory);
+          }
         });
       });
       //filter out duplicates
@@ -398,7 +393,6 @@ export default {
       });
       //compare both arrays and only return categories in both
       this.categories = this.categories.filter((category) => this.endpointCategoriesSlang.includes(category)).sort();
-
 
     },
 
@@ -480,6 +474,13 @@ export default {
 
     },
 
+    searchFilter: async function() {
+  
+      await this.filterPosts();
+      await this.updateRouterQuery('searchedValue', this.searchedValue);
+      
+    },
+
     clearAllFilters: function () {
       this.searchedValue = '';
       this.checkedTemplates = [];
@@ -500,17 +501,39 @@ export default {
 
     init : function() {
       if (Object.keys(this.$route.query).length !== 0) {
-      console.log("routing from url")
+        console.log("routing from url");
 
-       for (let key in this.$route.query) {
-          Vue.set(this, key, this.$route.query[key]);
+        for (let key in this.$route.query) {
+          if(key === "checkedTemplates"){
+            Vue.set(this, key, this.returnArray(this.$route.query[key]));
+
+          } else if (key === "startDate" || key === "endDate"){  
+            let value = this.$route.query[key];
+
+            value = moment.unix(value).format("MMM. DD, YYYY");
+            console.log(value);
+            Vue.set(this, key, value);
+          
+          }else {
+            Vue.set(this, key, this.$route.query[key]);
+          }
         }
       }
 
     },
 
+    returnArray (value) {
+      if (Array.isArray(value)) {
+        return value;
+      } 
+      if (value !== '') {
+        return [ value ];
+      } 
+      return [];
+    },
+
     updateRouterQuery: function (key, value) {
-      if (typeof value === 'undefined' || value === "" || value === null || value === NaN) {
+      if (typeof value === 'undefined' || value === "" || value === null) {
         Vue.delete(this.routerQuery, key);
       } else {
         Vue.set(this.routerQuery, key, value);
@@ -525,10 +548,15 @@ export default {
     },
 
     updateRouter: function () {
+
+      if (this.routerQuery  === this.$route.query) {
+        return;
+      } 
       this.$router.push({
         name: 'main',
         query: this.routerQuery,
-      });
+      }).catch(err => {});
+    
     },
   },
 };

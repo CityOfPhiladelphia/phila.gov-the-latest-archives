@@ -28,13 +28,13 @@
       <fieldset>
         <div class="grid-x grid-margin-x mbl">
           <div
-            v-for="(value, key) in templates"
+            v-for="(value, key) in templatesList"
             :key="key"
             class="cell medium-auto"
           >
             <input
               :id="key"
-              v-model="postTypes"
+              v-model="templates"
               type="checkbox"
               :value="key"
               :name="key"
@@ -51,8 +51,8 @@
       <div class="grid-x grid-margin-x">
         <div class="cell medium-4 small-11">
           <datepicker
-            v-model="startDate"
-            name="startDate"
+            v-model="start"
+            name="start"
             placeholder="Start date"
             format="MMM. dd, yyyy"
             @closed="filterPosts()"
@@ -63,8 +63,8 @@
         </div>
         <div class="cell medium-4 small-11">
           <datepicker
-            v-model="endDate"
-            name="endDate"
+            v-model="end"
+            name="end"
             placeholder="End date"
             format="MMM. dd, yyyy"
             @closed="filterPosts()"
@@ -192,8 +192,8 @@
         :show-step-links="true"
         :hide-single-page="false"
         :step-links="{
-          next: 'Older',
-          prev: 'Newer'
+          next: 'Next',
+          prev: 'Previous'
         }"
         @change="scrollToTop"
       />
@@ -245,10 +245,11 @@ export default {
     return {
       posts: [],
       filteredPosts: [],
+      
       templatePosts: [],
-      datedPosts: [],
+      datePosts: [],
       searchPosts: [],
-      categoryPosts: [],
+      departmentPosts: [],
       tagPosts: [],
       
       endpointCategories: [],
@@ -262,13 +263,13 @@ export default {
       currentSort:'date',
       currentSortDir: 'desc',
 
-      postTypes: [],
+      templates: [],
       categories: [],
       search: '',
       department: '',
       tag: '',
-      startDate: '',
-      endDate: '',
+      start: '',
+      end: '',
       
       searchOptions: {
         shouldSort: false, 
@@ -294,7 +295,7 @@ export default {
           'template',
         ],
       },
-      categoryOptions: {
+      departmentOptions: {
         shouldSort: false,
         threshold: 0.0,
         location: 0,
@@ -304,7 +305,7 @@ export default {
         ],
       },
 
-      templates: {
+      templatesList: {
         featured: "Featured",
         post: "Posts",
         action_guide: "Action guides",
@@ -327,30 +328,27 @@ export default {
         return this.currentSortDir;
       } 
       return "";
-      
     },
-
   },
 
   watch: {
-
     department (value) {
       this.updateRouterQuery('department', value);
     },
 
-    postTypes (value) {
-      this.updateRouterQuery('postTypes', value);
+    templates (value) {
+      this.updateRouterQuery('templates', value);
     },
 
-    startDate (value) {
+    start (value) {
       if (value) {
-        this.updateRouterQuery('startDate',  moment(value).unix());
+        this.updateRouterQuery('start',  moment(value).unix());
       }
     },
 
-    endDate (value) {
+    end (value) {
       if (value) {
-        this.updateRouterQuery('endDate', moment(value).unix());
+        this.updateRouterQuery('end', moment(value).unix());
       }
     },
 
@@ -369,6 +367,9 @@ export default {
   },
 
   methods: {
+    /**
+    * @desc fetches all archives posts from endpoint & calls filter posts to 
+    */
     getAllPosts: function() {
       {
         axios
@@ -391,6 +392,9 @@ export default {
       }
     },
 
+    /**
+    * @desc fetches all the departments from the categories endpoint
+    */
     getAllCategories: function() {
       {
         axios
@@ -404,6 +408,10 @@ export default {
       }
     },
 
+    /**
+    * @desc makes a list of all the departments from the fetched posts, and compares them to the
+    * ones from the endpoint. if the department is in both arrays, it will add it to the categories array
+    */
     getDropdownCategories: function () {
       this.posts.forEach((post) => {
         post.categories.forEach((category) => {
@@ -413,16 +421,14 @@ export default {
           }
         });
       });
-      //filter out duplicates
       this.categories = this.categories.filter((item, index) => this.categories.indexOf(item) === index);
-      //make array of endpoint array slang names  
+
       this.endpointCategories.forEach((category) => {
         let categoryName = category.slang_name;
         this.endpointCategoriesSlang.push(categoryName);
       });
-      //compare both arrays and only return categories in both
-      this.categories = this.categories.filter((category) => this.endpointCategoriesSlang.includes(category)).sort();
 
+      this.categories = this.categories.filter((category) => this.endpointCategoriesSlang.includes(category)).sort();
     },
 
     filterByTag: function () {
@@ -437,23 +443,23 @@ export default {
     },
 
     filterByDate: function () {
-      if ((this.startDate !== '' ) && (this.endDate !== '')) {
-        let start = moment(this.startDate.setHours(0,0,0,0)).unix(); //convert to 12AM of the start date
-        let end = moment(this.endDate.setHours(23,59,59,0)).unix(); //convert to 11:59pm of the end date
+      if ((this.start !== '' ) && (this.end !== '')) {
+        let start = moment(this.start.setHours(0,0,0,0)).unix(); //convert to 12:00AM of the start date
+        let end = moment(this.end.setHours(23,59,59,0)).unix(); //convert to 11:59pm of the end date
 
         if (end < start) {
           this.failure = true;
           this.filteredPosts = [];
         } else {
           this.failure = false;
-          this.datedPosts = [];
+          this.datePosts = [];
           this.searchPosts.forEach((post) => {
             let postDate = moment(post.date).unix();
             if ((postDate >= start) && (postDate <= end )) {
-              this.datedPosts.push(post);
+              this.datePosts.push(post);
             }
           });
-          this.tagPosts = this.datedPosts;
+          this.tagPosts = this.datePosts;
         }
       } else {
         this.tagPosts = this.searchPosts;
@@ -473,55 +479,67 @@ export default {
 
     filterByDepartment: function() {
       if (this.department !== '' && this.department !== null) { 
-        this.$search(this.department, this.posts, this.categoryOptions).then(posts => {
-          this.categoryPosts = posts;
+        this.$search(this.department, this.posts, this.departmentOptions).then(posts => {
+          this.departmentPosts = posts;
         });
       } else {
-        this.categoryPosts = this.posts;
+        this.departmentPosts = this.posts;
       }  
     },
 
-    filterByPostType: function() {
-      if (this.postTypes.length !== 0) {
+    filterByTemplate: function() {
+      if (this.templates.length !== 0) {
         this.templatePosts = [];
-        this.categoryPosts.forEach((post) => {
+        this.departmentPosts.forEach((post) => {
           let postType = post.template;
-          if (this.postTypes.includes(postType)) {
+          if (this.templates.includes(postType)) {
             this.templatePosts.push(post);
           }
         });
       } else {
-        this.templatePosts = this.categoryPosts;
+        this.templatePosts = this.departmentPosts;
       } 
     },
 
+    /**
+    * @desc adds the template to the templates array or removes it if it is being unchecked
+    */
     amendPostTypeList: function (postValue) {
-      if (!this.postTypes.includes(postValue)) {  // && postValue === one of the keys in templates (need to error check against injected values)? 
-        this.postTypes.push(postValue);
-      } else if (this.postTypes.includes(postValue)) {
-        this.postTypes = this.postTypes.filter(item => item !== postValue); 
+      if (!this.templates.includes(postValue)) {  
+        this.templates.push(postValue);
+      } else if (this.templates.includes(postValue)) {
+        this.templates = this.templates.filter(item => item !== postValue); 
       }
       this.filterPosts();
     },
-
+    
+    /**
+    * @desc calls all the filter helper functions in order
+    */
     filterPosts: async function () {
       await this.filterByDepartment();
-      await this.filterByPostType();
+      await this.filterByTemplate();
       await this.filterBySearch();
       await this.filterByDate();
       await this.filterByTag();
     },
 
+    /**
+    * @desc need to use this to filter from searches in order to update the router query at the same time
+    */
     searchFilter: async function() {
       await this.filterPosts();
       await this.updateRouterQuery('search', this.search);
     },
-
+    
+    /**
+    * @desc resets all the data that is associated with filtering posts, displaying all posts from endpoint
+    */
     clearAllFilters: function () {
       this.search = '';
-      this.postTypes = [];
-      this.startDate = '';
-      this.endDate = '';
+      this.templates = [];
+      this.start = '';
+      this.end = '';
       this.department = '';
       this.tag = '';
       this.resetRouterQuery();
@@ -561,21 +579,25 @@ export default {
       });
     },
 
+    /**
+    * @desc fetches all query params from the route and inputs it into the data of app
+    */
     initFilters: function() {
       if (Object.keys(this.$route.query).length !== 0) {
         for (let key in this.$route.query) {
-          if(key === "postTypes"){
+          if(key === "templates"){
             Vue.set(this, key, this.returnArray(this.$route.query[key]));
-          } else if (key === "startDate" || key === "endDate"){  
+          } else if (key === "start" || key === "end"){ 
             let value = this.$route.query[key];
-            value = new Date(value * 1000);
-            Vue.set(this, key, value);
+            if (!isNaN(value)) {
+              value = new Date(value * 1000);
+              Vue.set(this, key, value);
+            }
           } else {
             Vue.set(this, key, this.$route.query[key]);
           }
         }
       }
-
     },
 
     returnArray (value) {
@@ -596,12 +618,16 @@ export default {
       }
     },
 
+    /**
+    * @desc scrolls to top from paginate buttons
+    */
     scrollToTop : function () {
       window.scrollTo({
         top: 0,
         behavior: 'smooth',
       });
     },
+
 
     resetRouterQuery: function () {
       for (let key in this.$route.query) {
@@ -628,7 +654,6 @@ export default {
   width: 75%;
   margin: 0 auto;
   max-width: 1000px;
-
 }
 
 @media screen and (max-width: 750px) {
@@ -638,7 +663,6 @@ export default {
   .post-type {
     display: none !important;
   }
-
 }
 
 .post-title {
@@ -651,7 +675,7 @@ export default {
   float: right;
 }
 
-.post-label {
+.post-label, .table-sort {
   user-select: none;
 }
 
@@ -679,7 +703,6 @@ tr td:last-child {
   width: 30px;
   height:100%;
   fill: #0f4d90;
-  
 }
 
 .v-select .vs__actions{
@@ -743,6 +766,5 @@ tr td:last-child {
   background: #0f4d90;
   color: white;
 }
-
 
 </style>

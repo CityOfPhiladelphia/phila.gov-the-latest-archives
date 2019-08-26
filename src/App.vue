@@ -4,7 +4,7 @@
       <div class="search">
         <input
           id="search-bar"
-          v-model="searchedValue"
+          v-model="search"
           class="search-field"
           type="text"
           placeholder="Search by title, department, or keyword"
@@ -34,7 +34,7 @@
           >
             <input
               :id="key"
-              v-model="checkedTemplates"
+              v-model="postTypes"
               type="checkbox"
               :value="key"
               :name="key"
@@ -55,7 +55,6 @@
             name="startDate"
             placeholder="Start date"
             format="MMM. dd, yyyy"
-            :disabled="state.disabled"
             @closed="filterPosts()"
           />
         </div>
@@ -68,14 +67,13 @@
             name="endDate"
             placeholder="End date"
             format="MMM. dd, yyyy"
-            :disabled="state.disabled"
             @closed="filterPosts()"
           />
         </div>
         <div class="cell medium-11 small-24 auto filter-by-owner">
           <v-select
             ref="categorySelect"
-            v-model="selectedCategory"
+            v-model="department"
             label="slang_name"
             placeholder="All departments"
             :options="categories"
@@ -115,7 +113,7 @@
       class="table-container"
     >
       <table
-        
+        v-show="!loading && !emptyResponse && !failure" 
         class="stack theme-light archive-results"
         data-sticky-container
       >
@@ -127,15 +125,27 @@
           data-options="marginTop:4.8;"
         >
           <tr>
-            <th class="title">
-              Title
-            </th><th class="date">
-              Publish date
-            </th><th>Department</th>
-            <th> Post Type</th>
+            <th
+              class="table-sort title"
+              :class="sortTitle"
+              @click="sort('title')"
+            >
+              <span>Title</span>
+            </th>
+            <th
+              class="table-sort date"
+              :class="sortDate"
+              @click="sort('date')"
+            >
+              <span>Publish date</span>
+            </th>
+            <th>Department</th>
+            <th class="post-type">
+              Post Type
+            </th>
           </tr>
         </thead>
-        <paginate 
+        <paginate
           name="filteredPosts"
           :list="filteredPosts"
           class="paginate-list"
@@ -151,6 +161,7 @@
             <td class="title">
               <a
                 :href="post.link"
+                target="_blank"
                 @click.prevent="goToPost(post.link)"
               >
                 {{ post.title }}
@@ -167,7 +178,7 @@
                 <span>{{ category.slang_name }}</span><span v-if="i < post.categories.length - 1">,&nbsp;</span>
               </span>
             </td>
-            <td>
+            <td class="post-type">
               {{ post.template | formatTemplate }}
             </td>
           </tr>
@@ -189,7 +200,6 @@
     </div>
   </div> 
 </template>
-
 <script>
 
 import Vue from "vue";
@@ -203,14 +213,15 @@ import 'vue-select/dist/vue-select.css';
 
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
-Vue.component('v-select', vSelect);
 
 const endpoint =
   "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",
-  components: { Datepicker,
+  components: { 
+    Datepicker, 
+    vSelect,
   },
   filters: {
     'formatDate': function(value) {
@@ -234,16 +245,12 @@ export default {
     return {
       posts: [],
       filteredPosts: [],
-      
       templatePosts: [],
       datedPosts: [],
       searchPosts: [],
       categoryPosts: [],
+      tagPosts: [],
       
-      searchedValue: "",
-      selectedCategory: "",
-      checkedTemplates: [],
-      categories: [],
       endpointCategories: [],
       endpointCategoriesSlang: [],
       
@@ -252,12 +259,16 @@ export default {
       emptyResponse: false,
       failure: false,
 
+      currentSort:'date',
+      currentSortDir: 'desc',
+
+      postTypes: [],
+      categories: [],
+      search: '',
+      department: '',
+      tag: '',
       startDate: '',
       endDate: '',
-      
-      state: {
-        disabled: false,
-      },
       
       searchOptions: {
         shouldSort: false, 
@@ -265,8 +276,15 @@ export default {
         keys: [
           'title',
           'categories.name',
-          'tag.name',
-          'tag.slug',
+          'tags.name',
+        ],
+      },
+      tagOptions: {
+        shouldSort: false,
+        threshold: 0.0,
+        keys: [
+          'tags.name',
+          'tags.slug',
         ],
       },
       templateOptions: {
@@ -285,6 +303,7 @@ export default {
           'categories.slang_name',
         ],
       },
+
       templates: {
         featured: "Featured",
         post: "Posts",
@@ -296,17 +315,31 @@ export default {
     };
   },
   computed: { 
+    sortTitle: function(){
+      if (this.currentSort == 'title') {
+        return this.currentSortDir;
+      } 
+      return "";
+      
+    },
+    sortDate: function(){
+      if (this.currentSort == 'date'){
+        return this.currentSortDir;
+      } 
+      return "";
+      
+    },
 
   },
 
   watch: {
 
-    selectedCategory (value) {
-      this.updateRouterQuery('selectedCategory', value);
+    department (value) {
+      this.updateRouterQuery('department', value);
     },
 
-    checkedTemplates (value) {
-      this.updateRouterQuery('checkedTemplates', value);
+    postTypes (value) {
+      this.updateRouterQuery('postTypes', value);
     },
 
     startDate (value) {
@@ -375,7 +408,7 @@ export default {
       this.posts.forEach((post) => {
         post.categories.forEach((category) => {
           let newCategory = category.slang_name;
-          if (newCategory !== "") {
+          if (newCategory !== '') {
             this.categories.push(newCategory);
           }
         });
@@ -392,11 +425,21 @@ export default {
 
     },
 
+    filterByTag: function () {
+      if (this.tag !== '') { // there is nothing in the tag URL
+        this.filteredPosts = [];
+        this.$search(this.tag, this.tagPosts, this.tagOptions).then(posts => {
+          this.filteredPosts = posts;
+        });
+      } else {
+        this.filteredPosts = this.tagPosts;
+      }
+    },
+
     filterByDate: function () {
-      if ((this.startDate !== "" ) && (this.endDate !== "")) {
-        
-        let start = moment(this.startDate).unix();
-        let end = moment(this.endDate).unix();
+      if ((this.startDate !== '' ) && (this.endDate !== '')) {
+        let start = moment(this.startDate.setHours(0,0,0,0)).unix(); //convert to 12AM of the start date
+        let end = moment(this.endDate.setHours(23,59,59,0)).unix(); //convert to 11:59pm of the end date
 
         if (end < start) {
           this.failure = true;
@@ -410,17 +453,17 @@ export default {
               this.datedPosts.push(post);
             }
           });
-          this.filteredPosts = this.datedPosts;
+          this.tagPosts = this.datedPosts;
         }
       } else {
-        this.filteredPosts = this.searchPosts;
+        this.tagPosts = this.searchPosts;
       }
     },
 
     filterBySearch: function() {
-      if (this.searchedValue !== '') { // there is nothing in the search bar -> return everything in filteredPosts
+      if (this.search !== '') { // there is nothing in the search bar -> return everything in filteredPosts
         this.searchPosts = [];
-        this.$search(this.searchedValue, this.templatePosts, this.searchOptions).then(posts => {
+        this.$search(this.search, this.templatePosts, this.searchOptions).then(posts => {
           this.searchPosts = posts;
         });
       } else {
@@ -429,8 +472,8 @@ export default {
     },
 
     filterByDepartment: function() {
-      if (this.selectedCategory !== "" && this.selectedCategory !== null) { 
-        this.$search(this.selectedCategory, this.posts, this.categoryOptions).then(posts => {
+      if (this.department !== '' && this.department !== null) { 
+        this.$search(this.department, this.posts, this.categoryOptions).then(posts => {
           this.categoryPosts = posts;
         });
       } else {
@@ -439,11 +482,11 @@ export default {
     },
 
     filterByPostType: function() {
-      if (this.checkedTemplates.length !== 0) {
+      if (this.postTypes.length !== 0) {
         this.templatePosts = [];
         this.categoryPosts.forEach((post) => {
           let postType = post.template;
-          if (this.checkedTemplates.includes(postType)) {
+          if (this.postTypes.includes(postType)) {
             this.templatePosts.push(post);
           }
         });
@@ -453,10 +496,10 @@ export default {
     },
 
     amendPostTypeList: function (postValue) {
-      if (!this.checkedTemplates.includes(postValue)) {  // && postValue === one of the keys in templates (need to error check against injected values)? 
-        this.checkedTemplates.push(postValue);
-      } else if (this.checkedTemplates.includes(postValue)) {
-        this.checkedTemplates = this.checkedTemplates.filter(item => item !== postValue); 
+      if (!this.postTypes.includes(postValue)) {  // && postValue === one of the keys in templates (need to error check against injected values)? 
+        this.postTypes.push(postValue);
+      } else if (this.postTypes.includes(postValue)) {
+        this.postTypes = this.postTypes.filter(item => item !== postValue); 
       }
       this.filterPosts();
     },
@@ -466,45 +509,68 @@ export default {
       await this.filterByPostType();
       await this.filterBySearch();
       await this.filterByDate();
-
+      await this.filterByTag();
     },
 
     searchFilter: async function() {
       await this.filterPosts();
-      await this.updateRouterQuery('searchedValue', this.searchedValue);
-      
+      await this.updateRouterQuery('search', this.search);
     },
 
     clearAllFilters: function () {
-      this.searchedValue = '';
-      this.checkedTemplates = [];
+      this.search = '';
+      this.postTypes = [];
       this.startDate = '';
       this.endDate = '';
-      this.selectedCategory = '';
-      this.failure = false;
+      this.department = '';
+      this.tag = '';
       this.resetRouterQuery();
-
       this.filteredPosts = this.posts;
+      this.currentSort = 'date';
+      this.currentSortDir = 'desc';
+      this.sortPosts();
+      this.failure = false;
     },
 
     goToPost: function(link) {
       window.location.href = link;
     },
 
-    initFilters :   function() {
+    sort: function(column) {
+      //if column == current sort, reverse
+      if(column === this.currentSort) {
+        this.currentSortDir = this.currentSortDir === 'asc' ? 'desc' : 'asc';
+      }
+      this.currentSort = column;
+      this.sortPosts();
+    },
+
+    sortPosts: function() {
+      this.filteredPosts = this.filteredPosts.sort((a,b) => {
+        let modifier = 1;
+        if(this.currentSortDir === 'desc') {
+          modifier = -1;
+        }
+        if(a[this.currentSort] < b[this.currentSort]) {
+          return -1 * modifier;
+        }
+        if(a[this.currentSort] > b[this.currentSort]) {
+          return 1 * modifier;
+        }
+        return 0;
+      });
+    },
+
+    initFilters: function() {
       if (Object.keys(this.$route.query).length !== 0) {
-
         for (let key in this.$route.query) {
-          if(key === "checkedTemplates"){
+          if(key === "postTypes"){
             Vue.set(this, key, this.returnArray(this.$route.query[key]));
-
           } else if (key === "startDate" || key === "endDate"){  
             let value = this.$route.query[key];
-
-            value = moment.unix(value).format("MMM. DD, YYYY");
+            value = new Date(value * 1000);
             Vue.set(this, key, value);
-          
-          }else {
+          } else {
             Vue.set(this, key, this.$route.query[key]);
           }
         }
@@ -523,15 +589,14 @@ export default {
     },
 
     updateRouterQuery: function (key, value) {
-      if (typeof value === 'undefined' || value === "" || value === null) {
+      if (typeof value === 'undefined' || value === '' || value === null) {
         Vue.delete(this.routerQuery, key);
       } else {
         Vue.set(this.routerQuery, key, value);
-      
       }
     },
 
-    scrollToTop () {
+    scrollToTop : function () {
       window.scrollTo({
         top: 0,
         behavior: 'smooth',
@@ -545,7 +610,6 @@ export default {
     },
 
     updateRouter: function () {
-
       if (this.routerQuery  === this.$route.query) {
         return;
       } 
@@ -553,19 +617,30 @@ export default {
         name: 'main',
         query: this.routerQuery,
       }).catch(err => {});
-    
     },
   },
 };
 </script>
 
-<style>
+<style lang="scss">
 
 .search, .pam, .table-container {
   width: 75%;
   margin: 0 auto;
   max-width: 1000px;
+
 }
+
+@media screen and (max-width: 750px) {
+  .search, .pam, .table-container {
+    width: 98%;
+  }
+  .post-type {
+    display: none !important;
+  }
+
+}
+
 .post-title {
   text-align: center;
   display: block;

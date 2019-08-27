@@ -725,6 +725,7 @@ tr td:last-child {
 
 .v-select .vs__search {
  color: #a1a1a1;
+ background: white;
 }
 
 .vs__clear:hover {

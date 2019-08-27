@@ -38,8 +38,6 @@
               type="checkbox"
               :value="key"
               :name="key"
-              @click="amendPostTypeList(key)"
-              @focus="amendPostTypeList(key)"
             >
             <label
               :for="key"
@@ -216,7 +214,7 @@ Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
 const endpoint =
-  "https://www.phila.gov/wp-json/the-latest/v1/";
+  "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",
@@ -340,6 +338,7 @@ export default {
     },
 
     templates (value) {
+      this.filterPosts();
       this.updateRouterQuery('templates', value);
     },
 
@@ -508,18 +507,6 @@ export default {
       } else {
         this.templatePosts = this.departmentPosts;
       } 
-    },
-
-    /**
-    * @desc adds the template to the templates array or removes it if it is being unchecked
-    */
-    amendPostTypeList: function (postValue) {
-      if (!this.templates.includes(postValue)) {  
-        this.templates.push(postValue);
-      } else if (this.templates.includes(postValue)) {
-        this.templates = this.templates.filter(item => item !== postValue); 
-      }
-      this.filterPosts();
     },
     
     /**

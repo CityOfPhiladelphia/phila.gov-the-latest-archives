@@ -30,7 +30,7 @@
           <div
             v-for="(value, key) in templatesList"
             :key="key"
-            class="cell medium-auto"
+            class="cell medium-auto filter-box"
           >
             <input
               :id="key"
@@ -212,6 +212,9 @@ import Datepicker from 'vuejs-datepicker';
 
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
+
+// const endpoint =
+//   "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
 
 const endpoint =
   "https://www.phila.gov/wp-json/the-latest/v1/";
@@ -665,8 +668,8 @@ export default {
     display: none !important;
   }
 
-  .cell.medium-auto {
-    width: 33%;
+  .cell.medium-auto.filter-box {
+    width: 35% !important;
   }
 }
 

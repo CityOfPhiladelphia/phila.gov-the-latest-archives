@@ -214,7 +214,7 @@ Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
 const endpoint =
-  "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
+  "https://www.phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",

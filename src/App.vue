@@ -209,7 +209,7 @@ import vSelect from 'vue-select';
 import VuePaginate from "vue-paginate";
 import VueFuse from "vue-fuse";
 import Datepicker from 'vuejs-datepicker';
-import 'vue-select/dist/vue-select.css';
+
 
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
@@ -660,6 +660,8 @@ export default {
 </script>
 
 <style lang="scss">
+
+@import 'node_modules/vue-select/dist/vue-select';
 
 .search, .pam, .table-container {
   width: 75%;

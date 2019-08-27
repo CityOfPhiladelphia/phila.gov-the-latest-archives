@@ -720,7 +720,6 @@ tr td:last-child {
 
 .v-select .vs__actions{
   padding:0 5px 0 0;
-  
 }
 
 .v-select .vs__search {
@@ -728,6 +727,10 @@ tr td:last-child {
  background: white;
 }
 
+.vs__selected {
+  position: absolute;
+  
+}
 .vs__clear:hover {
   background-color: transparent;
 }

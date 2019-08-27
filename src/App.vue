@@ -662,7 +662,7 @@ export default {
 
 @media screen and (max-width: 750px) {
   .search, .pam, .table-container {
-    width: 98%;
+    width: 96% !important;
   }
   .post-type {
     display: none !important;

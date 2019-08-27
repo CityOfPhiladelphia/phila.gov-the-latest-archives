@@ -39,6 +39,7 @@
               :value="key"
               :name="key"
               @click="amendPostTypeList(key)"
+              @focus="amendPostTypeList(key)"
             >
             <label
               :for="key"
@@ -453,10 +454,10 @@ export default {
 
     filterByDate: function () {
       if ((this.start !== '' ) && (this.end !== '')) {
-        let start = moment(this.start.setHours(0,0,0,0)).unix(); //convert to 12:00AM of the start date
-        let end = moment(this.end.setHours(23,59,59,0)).unix(); //convert to 11:59pm of the end date
+        let queryStart = moment(this.start.setHours(0,0,0,0)).unix(); //convert to 12:00AM of the start date
+        let queryEnd = moment(this.end.setHours(23,59,59,0)).unix(); //convert to 11:59pm of the end date
 
-        if (end < start) {
+        if (queryEnd < queryStart) {
           this.failure = true;
           this.filteredPosts = [];
         } else {
@@ -464,7 +465,7 @@ export default {
           this.datePosts = [];
           this.searchPosts.forEach((post) => {
             let postDate = moment(post.date).unix();
-            if ((postDate >= start) && (postDate <= end )) {
+            if ((postDate >= queryStart) && (postDate <= queryEnd )) {
               this.datePosts.push(post);
             }
           });
@@ -594,17 +595,17 @@ export default {
     */
     initFilters: function() {
       if (Object.keys(this.$route.query).length !== 0) {
-        for (let key in this.$route.query) {
-          if(key === "templates"){
-            Vue.set(this, key, this.returnArray(this.$route.query[key]));
-          } else if (key === "start" || key === "end"){ 
-            let value = this.$route.query[key];
-            if (!isNaN(value)) {
-              value = new Date(value * 1000);
-              Vue.set(this, key, value);
+        for (let routerKey in this.$route.query) {
+          if(routerKey === "templates"){
+            Vue.set(this, routerKey, this.returnArray(this.$route.query[routerKey]));
+          } else if (routerKey === "start" || routerKey === "end"){ 
+            let unixValue = this.$route.query[routerKey];
+            if (!isNaN(unixValue)) {
+              unixValue = new Date(unixValue * 1000);
+              Vue.set(this, routerKey, unixValue);
             }
           } else {
-            Vue.set(this, key, this.$route.query[key]);
+            Vue.set(this, routerKey, this.$route.query[routerKey]);
           }
         }
       }
@@ -639,8 +640,8 @@ export default {
     },
 
     resetRouterQuery: function () {
-      for (let key in this.$route.query) {
-        Vue.delete(this.routerQuery, key);
+      for (let routeKey in this.$route.query) {
+        Vue.delete(this.routerQuery, routeKey);
       }
     },
 
@@ -652,7 +653,7 @@ export default {
         name: 'main',
         query: this.routerQuery,
       }).catch(e => {
-        window.console.log(e);
+        // window.console.log(e);
       });
     },
   },

@@ -210,6 +210,7 @@ import VuePaginate from "vue-paginate";
 import VueFuse from "vue-fuse";
 import Datepicker from 'vuejs-datepicker';
 import 'vue-select/dist/vue-select.css';
+import { POINT_CONVERSION_COMPRESSED } from 'constants';
 
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
@@ -238,8 +239,11 @@ export default {
         return "Featured";
       } else if (value === "press_release") {
         return "Press Release";
+      } else if (value === "news_post") {
+        return "Post";
       }
     },
+
   },
   data: function() {
     return {
@@ -273,7 +277,7 @@ export default {
       
       searchOptions: {
         shouldSort: false, 
-        threshold: 0.4, 
+        threshold: 0.3, 
         keys: [
           'title',
           'categories.name',
@@ -424,8 +428,7 @@ export default {
       this.categories = this.categories.filter((item, index) => this.categories.indexOf(item) === index);
 
       this.endpointCategories.forEach((category) => {
-        let categoryName = category.slang_name;
-        this.endpointCategoriesSlang.push(categoryName);
+        this.endpointCategoriesSlang.push(category.slang_name);
       });
 
       this.categories = this.categories.filter((category) => this.endpointCategoriesSlang.includes(category)).sort();
@@ -437,9 +440,19 @@ export default {
         this.$search(this.tag, this.tagPosts, this.tagOptions).then(posts => {
           this.filteredPosts = posts;
         });
+
       } else {
         this.filteredPosts = this.tagPosts;
+     
       }
+    },
+
+    checkEmpty: function() {
+      if (this.filteredPosts.length === 0) {
+        this.emptyResponse = true;
+      } else {
+        this.emptyResponse = false;
+      } 
     },
 
     filterByDate: function () {
@@ -491,8 +504,7 @@ export default {
       if (this.templates.length !== 0) {
         this.templatePosts = [];
         this.departmentPosts.forEach((post) => {
-          let postType = post.template;
-          if (this.templates.includes(postType)) {
+          if (this.templates.includes(post.template)) {
             this.templatePosts.push(post);
           }
         });
@@ -522,6 +534,7 @@ export default {
       await this.filterBySearch();
       await this.filterByDate();
       await this.filterByTag();
+      await this.checkEmpty();
     },
 
     /**
@@ -548,6 +561,7 @@ export default {
       this.currentSortDir = 'desc';
       this.sortPosts();
       this.failure = false;
+      this.checkEmpty();
     },
 
     goToPost: function(link) {
@@ -627,7 +641,6 @@ export default {
         behavior: 'smooth',
       });
     },
-
 
     resetRouterQuery: function () {
       for (let key in this.$route.query) {
@@ -717,10 +730,6 @@ tr td:last-child {
 .vs__clear:hover {
   background-color: transparent;
 }
-
-/* .vs__clear {
-  fill: black;
-} */
 
 .v-select .vs__dropdown-toggle{
   border-radius: 0;

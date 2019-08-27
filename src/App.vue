@@ -243,7 +243,6 @@ export default {
         return "Post";
       }
     },
-
   },
   data: function() {
     return {
@@ -426,11 +425,9 @@ export default {
         });
       });
       this.categories = this.categories.filter((item, index) => this.categories.indexOf(item) === index);
-
       this.endpointCategories.forEach((category) => {
         this.endpointCategoriesSlang.push(category.slang_name);
       });
-
       this.categories = this.categories.filter((category) => this.endpointCategoriesSlang.includes(category)).sort();
     },
 
@@ -440,10 +437,8 @@ export default {
         this.$search(this.tag, this.tagPosts, this.tagOptions).then(posts => {
           this.filteredPosts = posts;
         });
-
       } else {
         this.filteredPosts = this.tagPosts;
-     
       }
     },
 

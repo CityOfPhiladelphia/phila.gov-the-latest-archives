@@ -669,7 +669,7 @@ export default {
   }
 
   .cell.medium-auto.filter-box {
-    width: 35% !important;
+    width: 50% !important;
   }
 }
 

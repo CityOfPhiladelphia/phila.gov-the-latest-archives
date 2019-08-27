@@ -676,6 +676,10 @@ export default {
   .post-type {
     display: none !important;
   }
+
+  .cell.medium-auto {
+    width: 33%;
+  }
 }
 
 .post-title {

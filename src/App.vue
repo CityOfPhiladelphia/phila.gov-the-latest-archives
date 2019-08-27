@@ -655,7 +655,7 @@ export default {
 @import 'node_modules/vue-select/dist/vue-select';
 
 .search, .pam, .table-container {
-  width: 75%;
+  width: 75% !important;
   margin: 0 auto;
   max-width: 1000px;
 }

@@ -141,7 +141,7 @@
             </th>
             <th>Department</th>
             <th class="post-type">
-              Post Type
+              Type
             </th>
           </tr>
         </thead>
@@ -729,7 +729,7 @@ tr td:last-child {
 
 .vs__selected {
   position: absolute;
-  
+
 }
 .vs__clear:hover {
   background-color: transparent;

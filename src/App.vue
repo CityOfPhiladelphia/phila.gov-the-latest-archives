@@ -210,13 +210,12 @@ import VuePaginate from "vue-paginate";
 import VueFuse from "vue-fuse";
 import Datepicker from 'vuejs-datepicker';
 import 'vue-select/dist/vue-select.css';
-import { POINT_CONVERSION_COMPRESSED } from 'constants';
 
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
 const endpoint =
-  "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
+  "https://www.phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",
@@ -389,6 +388,7 @@ export default {
             this.loading = false;
           })
           .catch(e => {
+            window.console.log(e);
             this.failure = true;
             this.loading = false;
           });
@@ -406,6 +406,7 @@ export default {
             this.endpointCategories = response.data;
           })
           .catch (e => {
+            window.console.log(e);
             this.endpointCategories = [];
           });
       }
@@ -650,7 +651,9 @@ export default {
       this.$router.push({
         name: 'main',
         query: this.routerQuery,
-      }).catch(err => {});
+      }).catch(e => {
+        window.console.log(e);
+      });
     },
   },
 };

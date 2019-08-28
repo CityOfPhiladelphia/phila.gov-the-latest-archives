@@ -277,7 +277,7 @@ export default {
       
       searchOptions: {
         shouldSort: false, 
-        threshold: 0.3, 
+        threshold: 0.5, 
         keys: [
           'title',
           'categories.name',

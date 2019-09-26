@@ -54,6 +54,7 @@
             name="start"
             placeholder="Start date"
             format="MMM. dd, yyyy"
+            :disabled-dates="disabledStartDate"
             @closed="filterPosts()"
           />
         </div>
@@ -66,6 +67,7 @@
             name="end"
             placeholder="End date"
             format="MMM. dd, yyyy"
+            :disabled-dates="disabledEndDate"
             @closed="filterPosts()"
           />
         </div>
@@ -316,6 +318,10 @@ export default {
         press_release: "Press releases",
       },
 
+      disabledStartDate: {
+        to: new Date(2015, 6, 25),
+      },
+
       routerQuery: {},
     };
   },
@@ -332,6 +338,17 @@ export default {
         return this.currentSortDir;
       } 
       return "";
+    },
+
+    disabledEndDate: function(){
+      if (this.start == '')  {
+        return this.disabledStartDate;
+      } else if (this.start) {
+        return {
+          to: new Date(this.start),
+        };
+      } 
+      return this.disabledStartDate;
     },
   },
 
@@ -655,22 +672,9 @@ export default {
 @import 'node_modules/vue-select/dist/vue-select';
 
 .search, .pam, .table-container {
-  width: 75% !important;
+  width: 75%;
   margin: 0 auto;
   max-width: 1000px;
-}
-
-@media screen and (max-width: 750px) {
-  .search, .pam, .table-container {
-    width: 96% !important;
-  }
-  .post-type {
-    display: none !important;
-  }
-
-  .cell.medium-auto.filter-box {
-    width: 40% !important;
-  }
 }
 
 .post-title {
@@ -773,6 +777,19 @@ tr td:last-child {
 .vs__dropdown-option--highlight.vs__dropdown-option{
   background: #0f4d90;
   color: white;
+}
+
+@media screen and (max-width: 750px) {
+  .search, .pam, .table-container {
+    width: 96%;
+  }
+  .post-type {
+    display: none;
+  }
+
+  .cell.medium-auto.filter-box {
+    width: 40%;
+  }
 }
 
 </style>

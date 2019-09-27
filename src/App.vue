@@ -215,11 +215,11 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-// const endpoint =
-//   "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
-
 const endpoint =
-  "https://www.phila.gov/wp-json/the-latest/v1/";
+  "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
+
+// const endpoint =
+//   "https://www.phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",
@@ -319,6 +319,7 @@ export default {
       },
 
       disabledStartDate: {
+        from: new Date(Date.now()),
         to: new Date(2015, 6, 25),
       },
 
@@ -346,6 +347,7 @@ export default {
       } else if (this.start) {
         return {
           to: new Date(this.start),
+          from: new Date(Date.now()),
         };
       } 
       return this.disabledStartDate;
@@ -371,6 +373,7 @@ export default {
     end (value) {
       if (value) {
         this.updateRouterQuery('end', moment(value).unix());
+        this.disabledStartDate.from = value;
       }
     },
 

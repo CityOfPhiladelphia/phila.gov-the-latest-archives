@@ -373,6 +373,7 @@ export default {
     end (value) {
       if (value) {
         this.updateRouterQuery('end', moment(value).unix());
+        this.disabledStartDate.from = value;
       }
     },
 

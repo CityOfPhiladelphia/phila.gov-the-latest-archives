@@ -217,11 +217,11 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-const endpoint =
-  "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
-
 // const endpoint =
-//   "https://www.phila.gov/wp-json/the-latest/v1/";
+//   "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
+
+const endpoint =
+  "https://www.phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",

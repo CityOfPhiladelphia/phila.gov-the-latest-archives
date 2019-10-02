@@ -1,4 +1,4 @@
 module.exports = {
   filenameHashing: false,
-  publicPath: "/thelatest-archive/staging/",
+  // publicPath: "/thelatest-archive/staging/",
 };

@@ -1,5 +1,5 @@
-import BrowserSupport from  "./browser-support.js";
-BrowserSupport.isIE();
+require("./polyfills/Array.prototype.find.js");
+require("./polyfills/Array.prototype.includes.js");
 
 import Vue from 'vue';
 import App from './App.vue';

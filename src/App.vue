@@ -54,6 +54,7 @@
             name="start"
             placeholder="Start date"
             format="MMM. dd, yyyy"
+            
             :disabled-dates="disabledStartDate"
             @closed="filterPosts()"
           />
@@ -68,6 +69,7 @@
             placeholder="End date"
             format="MMM. dd, yyyy"
             :disabled-dates="disabledEndDate"
+            
             @closed="filterPosts()"
           />
         </div>
@@ -215,11 +217,11 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-const endpoint =
-  "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
-
 // const endpoint =
-//   "https://www.phila.gov/wp-json/the-latest/v1/";
+//   "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
+
+const endpoint =
+  "https://www.phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",
@@ -374,7 +376,11 @@ export default {
       if (value) {
         this.updateRouterQuery('end', moment(value).unix());
         this.disabledStartDate.from = value;
-      }
+      } else {
+        this.disabledStartDate.from = new Date(Date.now());
+        this.disabledEndDate.from = new Date(Date.now());
+      }        
+     
     },
 
     routerQuery: {

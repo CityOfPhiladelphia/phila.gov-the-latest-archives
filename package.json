@@ -5,12 +5,15 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build-modern": "vue-cli-service build --modern",
     "build-dev": "vue-cli-service build --mode dev",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.6.0",
     "axios": "^0.19.0",
     "babel-polyfill": "^6.26.0",
+    "core-js": "^2.6.9",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
     "v-tooltip": "^2.0.0-rc.33",

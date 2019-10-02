@@ -54,6 +54,7 @@
             name="start"
             placeholder="Start date"
             format="MMM. dd, yyyy"
+            
             :disabled-dates="disabledStartDate"
             @closed="filterPosts()"
           />
@@ -68,6 +69,7 @@
             placeholder="End date"
             format="MMM. dd, yyyy"
             :disabled-dates="disabledEndDate"
+            
             @closed="filterPosts()"
           />
         </div>
@@ -374,7 +376,11 @@ export default {
       if (value) {
         this.updateRouterQuery('end', moment(value).unix());
         this.disabledStartDate.from = value;
-      }
+      } else {
+        this.disabledStartDate.from = new Date(Date.now());
+        this.disabledEndDate.from = new Date(Date.now());
+      }        
+     
     },
 
     routerQuery: {

@@ -1,13 +1,12 @@
-require("./polyfills/Array.prototype.find.js");
-require("./polyfills/Array.prototype.includes.js");
-// import 'core-js';
+import BrowserSupport from  "./browser-support.js";
+BrowserSupport.isIE();
+
 import Vue from 'vue';
 import App from './App.vue';
 import VueRouter from 'vue-router';
 
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
-
 
 const router = new VueRouter({
   routes: [

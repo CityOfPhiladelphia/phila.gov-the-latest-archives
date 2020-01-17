@@ -303,15 +303,6 @@ export default {
           'template',
         ],
       },
-      departmentOptions: {
-        shouldSort: false,
-        threshold: 0.0,
-        location: 0,
-        maxPatternLength: 200,
-        keys: [
-          'categories.slang_name',
-        ],
-      },
 
       templatesList: {
         featured: "Featured",
@@ -517,8 +508,12 @@ export default {
 
     filterByDepartment: function() {
       if (this.department !== '' && this.department !== null) { 
-        this.$search(this.department, this.posts, this.departmentOptions).then(posts => {
-          this.departmentPosts = posts;
+        this.departmentPosts = this.posts.filter(post => {
+          return post.categories.find(category => {
+            if(category.slang_name === this.department) {
+              return;
+            }
+          });
         });
       } else {
         this.departmentPosts = this.posts;

@@ -511,7 +511,7 @@ export default {
         this.departmentPosts = this.posts.filter(post => {
           return post.categories.find(category => {
             if(category.slang_name === this.department) {
-              return;
+              return true;
             }
           });
         });

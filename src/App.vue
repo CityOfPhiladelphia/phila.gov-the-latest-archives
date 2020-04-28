@@ -48,7 +48,7 @@
         </div>
       </fieldset>
       <div class="grid-x grid-margin-x">
-        <div class="cell medium-3 small-11">
+        <div class="cell medium-4 small-10">
           <datepicker
             v-model="start"
             name="start"
@@ -62,7 +62,7 @@
         <div class="cell medium-1 small-2 mts">
           <i class="fas fa-arrow-right" />
         </div>
-        <div class="cell medium-3 small-11">
+        <div class="cell medium-4 small-10">
           <datepicker
             v-model="end"
             name="end"
@@ -73,17 +73,23 @@
             @closed="filterPosts()"
           />
         </div>
-        <div class="cell medium-5 small-2 filter-by-owner">
+        <div 
+          id="lang-filter"
+          class="cell medium-5 small-2 filter-by-owner"
+        >
           <v-select
             ref="categorySelect"
             v-model="language"
-            label="language"
+            label="langName"
             placeholder="Language"
             :options="languages"
             @input="filterPosts()"
           />
         </div>
-        <div class="cell medium-5 small-24 auto filter-by-owner">
+        <div 
+          id="dept-filter"
+          class="cell medium-5 small-24 auto filter-by-owner"
+        >
           <v-select
             ref="categorySelect"
             v-model="department"
@@ -284,13 +290,36 @@ export default {
 
       templates: [],
       categories: [],
-      languages: [ "english",
-        "spanish" , 
-        "chinese",
-        "vietnamese",
-        "russian",
-        "french" ,
-        "arabic" ],
+      languages: [ 
+        {
+          langCode: "english",
+          langName: "English",
+        },
+        {
+          langCode: "spanish",
+          langName: "Español",
+        },
+        {
+          langCode: "chinese",
+          langName: "中文",
+        },
+        {
+          langCode: "vietnamese",
+          langName: "Tiếng Việt",
+        },
+        {
+          langCode: "russian",
+          langName: "Pусский",
+        },
+        {
+          langCode: "french",
+          langName: "Français",
+        },
+        {
+          langCode: "arabic",
+          langName: "عربى",
+        },
+      ],
       search: '',
       department: '',
       tag: '',
@@ -395,6 +424,13 @@ export default {
      
     },
 
+    language (value) {
+      if (value) {
+        this.updateRouterQuery('language', value.langCode);
+      }       
+     
+    },
+
     routerQuery: {
       handler: function () {
         this.updateRouter();
@@ -488,8 +524,13 @@ export default {
     filterByLanguage: function() {
       if (this.language) {
         this.filteredPosts = [];
+        // let selectedLang = this.languages.filter(langObj => {
+        //   return langObj.langName == this.langauge; 
+        // });
+
+        // console.log(selectedLang);
         this.filteredPosts = this.langPosts.filter(post => {
-          return post.language == this.language;
+          return post.language == this.language.langCode;
         });
         
       } else {
@@ -652,6 +693,15 @@ export default {
               unixValue = new Date(unixValue * 1000);
               Vue.set(this, routerKey, unixValue);
             }
+          } else if (routerKey == "language") {
+
+            let setLang = this.languages.filter(langObj => {
+              return langObj.langCode == this.$route.query[routerKey]; 
+            });
+            console.log(setLang[0]);
+            this.language = setLang[0];
+
+            // Vue.set(this, routerKey, this.$route.query[routerKey]);
           } else {
             Vue.set(this, routerKey, this.$route.query[routerKey]);
           }
@@ -780,8 +830,8 @@ tr td:last-child {
   padding:0;
 }
 
-.v-select .vs__dropdown-menu{
- width: 100%;
+#dept-filter .v-select .vs__dropdown-menu{
+ width: 400px;
 }
 
 .filter-by-owner .v-select input[type=search],
@@ -835,6 +885,10 @@ tr td:last-child {
 
   .cell.medium-auto.filter-box {
     width: 40%;
+  }
+
+  .filter-by-owner {
+    width: 90% !important;
   }
 }
 

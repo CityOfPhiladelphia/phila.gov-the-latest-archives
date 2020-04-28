@@ -48,7 +48,7 @@
         </div>
       </fieldset>
       <div class="grid-x grid-margin-x">
-        <div class="cell medium-4 small-11">
+        <div class="cell medium-3 small-11">
           <datepicker
             v-model="start"
             name="start"
@@ -62,7 +62,7 @@
         <div class="cell medium-1 small-2 mts">
           <i class="fas fa-arrow-right" />
         </div>
-        <div class="cell medium-4 small-11">
+        <div class="cell medium-3 small-11">
           <datepicker
             v-model="end"
             name="end"
@@ -73,7 +73,17 @@
             @closed="filterPosts()"
           />
         </div>
-        <div class="cell medium-11 small-24 auto filter-by-owner">
+        <div class="cell medium-5 small-2 filter-by-owner">
+          <v-select
+            ref="categorySelect"
+            v-model="language"
+            label="language"
+            placeholder="Language"
+            :options="languages"
+            @input="filterPosts()"
+          />
+        </div>
+        <div class="cell medium-5 small-24 auto filter-by-owner">
           <v-select
             ref="categorySelect"
             v-model="department"
@@ -259,6 +269,7 @@ export default {
       searchPosts: [],
       departmentPosts: [],
       tagPosts: [],
+      langPosts: [],
       
       endpointCategories: [],
       endpointCategoriesSlang: [],
@@ -273,11 +284,19 @@ export default {
 
       templates: [],
       categories: [],
+      languages: [ "english",
+        "spanish" , 
+        "chinese",
+        "vietnamese",
+        "russian",
+        "french" ,
+        "arabic" ],
       search: '',
       department: '',
       tag: '',
       start: '',
       end: '',
+      language: '',
       
       searchOptions: {
         shouldSort: false, 
@@ -310,6 +329,8 @@ export default {
         action_guide: "Action guides",
         press_release: "Press releases",
       },
+
+      
 
       disabledStartDate: {
         from: new Date(Date.now()),
@@ -451,16 +472,30 @@ export default {
       });
       this.categories = this.categories.filter((category) => this.endpointCategoriesSlang.includes(category)).sort();
     },
+  
 
     filterByTag: function () {
       if (this.tag !== '') { // there is nothing in the tag URL
-        this.filteredPosts = [];
+        this.langPosts = [];
         this.$search(this.tag, this.tagPosts, this.tagOptions).then(posts => {
-          this.filteredPosts = posts;
+          this.langPosts = posts;
         });
       } else {
-        this.filteredPosts = this.tagPosts;
+        this.langPosts = this.tagPosts;
       }
+    },
+
+    filterByLanguage: function() {
+      if (this.language) {
+        this.filteredPosts = [];
+        this.filteredPosts = this.langPosts.filter(post => {
+          return post.language == this.language;
+        });
+        
+      } else {
+        this.filteredPosts = this.langPosts;
+      }
+
     },
 
     checkEmpty: function() {
@@ -542,6 +577,7 @@ export default {
       await this.filterBySearch();
       await this.filterByDate();
       await this.filterByTag();
+      await this.filterByLanguage();
       await this.checkEmpty();
     },
 
@@ -563,6 +599,7 @@ export default {
       this.end = '';
       this.department = '';
       this.tag = '';
+      this.language = '';
       this.resetRouterQuery();
       this.filteredPosts = this.posts;
       this.currentSort = 'date';
@@ -706,7 +743,7 @@ tr td:last-child {
 .filter-by-owner{
   font-family:"Open Sans", Helvetica, Roboto, Arial, sans-serif !important;
 }
-.filter-by-owner .v-select .vs__dropdown-toggle{
+.filter-by-owner .v-select .vs__dropdown-toggle {
   border:none;
   background:white;
 }
@@ -742,6 +779,11 @@ tr td:last-child {
   border-radius: 0;
   padding:0;
 }
+
+.v-select .vs__dropdown-menu{
+ width: 100%;
+}
+
 .filter-by-owner .v-select input[type=search],
 .v-select input[type=search]:focus{
   border:none;

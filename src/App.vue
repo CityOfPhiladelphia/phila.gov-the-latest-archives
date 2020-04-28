@@ -48,7 +48,7 @@
         </div>
       </fieldset>
       <div class="grid-x grid-margin-x">
-        <div class="cell medium-4 small-11">
+        <div class="cell medium-4 small-10">
           <datepicker
             v-model="start"
             name="start"
@@ -62,7 +62,7 @@
         <div class="cell medium-1 small-2 mts">
           <i class="fas fa-arrow-right" />
         </div>
-        <div class="cell medium-4 small-11">
+        <div class="cell medium-4 small-10">
           <datepicker
             v-model="end"
             name="end"
@@ -73,7 +73,23 @@
             @closed="filterPosts()"
           />
         </div>
-        <div class="cell medium-11 small-24 auto filter-by-owner">
+        <div 
+          id="lang-filter"
+          class="cell medium-5 small-2 filter-by-owner"
+        >
+          <v-select
+            ref="categorySelect"
+            v-model="language"
+            label="langName"
+            placeholder="Language"
+            :options="languages"
+            @input="filterPosts()"
+          />
+        </div>
+        <div 
+          id="dept-filter"
+          class="cell medium-5 small-24 auto filter-by-owner"
+        >
           <v-select
             ref="categorySelect"
             v-model="department"
@@ -259,6 +275,7 @@ export default {
       searchPosts: [],
       departmentPosts: [],
       tagPosts: [],
+      langPosts: [],
       
       endpointCategories: [],
       endpointCategoriesSlang: [],
@@ -273,11 +290,42 @@ export default {
 
       templates: [],
       categories: [],
+      languages: [ 
+        {
+          langCode: "english",
+          langName: "English",
+        },
+        {
+          langCode: "spanish",
+          langName: "Español",
+        },
+        {
+          langCode: "chinese",
+          langName: "中文",
+        },
+        {
+          langCode: "vietnamese",
+          langName: "Tiếng Việt",
+        },
+        {
+          langCode: "russian",
+          langName: "Pусский",
+        },
+        {
+          langCode: "french",
+          langName: "Français",
+        },
+        {
+          langCode: "arabic",
+          langName: "عربى",
+        },
+      ],
       search: '',
       department: '',
       tag: '',
       start: '',
       end: '',
+      language: '',
       
       searchOptions: {
         shouldSort: false, 
@@ -310,6 +358,8 @@ export default {
         action_guide: "Action guides",
         press_release: "Press releases",
       },
+
+      
 
       disabledStartDate: {
         from: new Date(Date.now()),
@@ -371,6 +421,13 @@ export default {
         this.disabledStartDate.from = new Date(Date.now());
         this.disabledEndDate.from = new Date(Date.now());
       }        
+     
+    },
+
+    language (value) {
+      if (value) {
+        this.updateRouterQuery('language', value.langCode);
+      }       
      
     },
 
@@ -451,16 +508,35 @@ export default {
       });
       this.categories = this.categories.filter((category) => this.endpointCategoriesSlang.includes(category)).sort();
     },
+  
 
     filterByTag: function () {
       if (this.tag !== '') { // there is nothing in the tag URL
-        this.filteredPosts = [];
+        this.langPosts = [];
         this.$search(this.tag, this.tagPosts, this.tagOptions).then(posts => {
-          this.filteredPosts = posts;
+          this.langPosts = posts;
         });
       } else {
-        this.filteredPosts = this.tagPosts;
+        this.langPosts = this.tagPosts;
       }
+    },
+
+    filterByLanguage: function() {
+      if (this.language) {
+        this.filteredPosts = [];
+        // let selectedLang = this.languages.filter(langObj => {
+        //   return langObj.langName == this.langauge; 
+        // });
+
+        // console.log(selectedLang);
+        this.filteredPosts = this.langPosts.filter(post => {
+          return post.language == this.language.langCode;
+        });
+        
+      } else {
+        this.filteredPosts = this.langPosts;
+      }
+
     },
 
     checkEmpty: function() {
@@ -542,6 +618,7 @@ export default {
       await this.filterBySearch();
       await this.filterByDate();
       await this.filterByTag();
+      await this.filterByLanguage();
       await this.checkEmpty();
     },
 
@@ -563,6 +640,7 @@ export default {
       this.end = '';
       this.department = '';
       this.tag = '';
+      this.language = '';
       this.resetRouterQuery();
       this.filteredPosts = this.posts;
       this.currentSort = 'date';
@@ -615,6 +693,15 @@ export default {
               unixValue = new Date(unixValue * 1000);
               Vue.set(this, routerKey, unixValue);
             }
+          } else if (routerKey == "language") {
+
+            let setLang = this.languages.filter(langObj => {
+              return langObj.langCode == this.$route.query[routerKey]; 
+            });
+            console.log(setLang[0]);
+            this.language = setLang[0];
+
+            // Vue.set(this, routerKey, this.$route.query[routerKey]);
           } else {
             Vue.set(this, routerKey, this.$route.query[routerKey]);
           }
@@ -706,7 +793,7 @@ tr td:last-child {
 .filter-by-owner{
   font-family:"Open Sans", Helvetica, Roboto, Arial, sans-serif !important;
 }
-.filter-by-owner .v-select .vs__dropdown-toggle{
+.filter-by-owner .v-select .vs__dropdown-toggle {
   border:none;
   background:white;
 }
@@ -742,6 +829,11 @@ tr td:last-child {
   border-radius: 0;
   padding:0;
 }
+
+#dept-filter .v-select .vs__dropdown-menu{
+ width: 400px;
+}
+
 .filter-by-owner .v-select input[type=search],
 .v-select input[type=search]:focus{
   border:none;
@@ -793,6 +885,10 @@ tr td:last-child {
 
   .cell.medium-auto.filter-box {
     width: 40%;
+  }
+
+  .filter-by-owner {
+    width: 90% !important;
   }
 }
 

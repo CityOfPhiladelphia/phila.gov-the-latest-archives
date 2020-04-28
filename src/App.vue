@@ -315,10 +315,10 @@ export default {
           langCode: "french",
           langName: "Français",
         },
-        {
-          langCode: "arabic",
-          langName: "عربى",
-        },
+        // {
+        //   langCode: "arabic",
+        //   langName: "عربى",
+        // },
       ],
       search: '',
       department: '',

@@ -321,39 +321,39 @@ export default {
         },
         {
           langCode: 'bengali',
-          langNmae: 'বাংলা',
+          langName: 'বাংলা',
         },
         {
           langCode: 'haitian',
-          langNmae: 'Ayisyen',
+          langName: 'Ayisyen',
         },
         {
           langCode: 'hindo',
-          langNmae: 'Hindo',
+          langName: 'Hindo',
         },
         {
           langCode: 'indonesian', 
-          langNmae: 'Bahasa Indonesia',
+          langName: 'Bahasa Indonesia',
         },
         {
           langCode: 'urdu', 
-          langNmae: 'اردو',
+          langName: 'اردو',
         },
         {
           langCode: 'korean', 
-          langNmae: '한국어',
+          langName: '한국어',
         },
         {
           langCode: 'khmer', 
-          langNmae: 'ខ្មែរ',
+          langName: 'ខ្មែរ',
         },
         {
           langCode: 'portuguese', 
-          langNmae: 'Português',
+          langName: 'Português',
         },
         {
           langCode: 'swahili',
-          langNmae: 'Kiswahili',
+          langName: 'Kiswahili',
         },
       ],
       search: '',

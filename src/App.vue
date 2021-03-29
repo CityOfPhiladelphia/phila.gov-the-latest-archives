@@ -475,57 +475,50 @@ export default {
 
   },
 
-  created:  function() {
-    this.getAllPosts();
-    this.getAllCategories();
+  created () {
+    let vm = this;
+    vm.init();
   },
-
   methods: {
-    /**
-    * @desc fetches all archives posts from endpoint & calls filter posts to 
-    */
-    getAllPosts: function() {
+    async init() {
       let vm = this;
-      {
-        axios
-          .get(vm.api.url+vm.api.endpoint + "archives", {
-            params: {
-              count: -1,
-            },
-          })
-          .then(response => {
-            this.posts = response.data;
-            this.getDropdownCategories();
-            this.initFilters();
-            this.filterPosts();
-            this.loading = false;
-          })
-          .catch(e => {
-            window.console.log(e);
-            this.failure = true;
-            this.loading = false;
-          });
-      }
+      await vm.getAllPosts();
+      await vm.getAllCategories();
+    },
+    async getAllPosts () {
+      let vm = this;
+      return axios.get(vm.api.url+vm.api.endpoint + "archives", {
+        params: {
+          // count: -1,
+          count: 50,
+        },
+      })
+        .then(response => {
+          this.posts = response.data;
+          this.getDropdownCategories();
+          this.initFilters();
+          this.filterPosts();
+          this.loading = false;
+        })
+        .catch(() => {
+          this.failure = true;
+          this.loading = false;
+        });
     },
 
     /**
     * @desc fetches all the departments from the categories endpoint
     */
-    getAllCategories: function() {
+    async getAllCategories () {
       let vm = this;
-      {
-        axios
-          .get(vm.api.url+vm.api.endpoint + "categories")
-          .then(response => {
-            this.endpointCategories = response.data;
-          })
-          .catch (e => {
-            window.console.log(e);
-            this.endpointCategories = [];
-          });
-      }
+      return axios.get(vm.api.url+vm.api.endpoint + "categories")
+        .then(response => {
+          this.endpointCategories = response.data;
+        })
+        .catch (() => {
+          this.endpointCategories = [];
+        });
     },
-
     /**
     * @desc makes a list of all the departments from the fetched posts, and compares them to the
     * ones from the endpoint. if the department is in both arrays, it will add it to the categories array
@@ -735,7 +728,6 @@ export default {
             let setLang = this.languages.filter(langObj => {
               return langObj.langCode == this.$route.query[routerKey]; 
             });
-            console.log(setLang[0]);
             this.language = setLang[0];
 
             // Vue.set(this, routerKey, this.$route.query[routerKey]);
@@ -787,7 +779,7 @@ export default {
       this.$router.push({
         name: 'main',
         query: this.routerQuery,
-      }).catch(e => {
+      }).catch(() => {
         // window.console.log(e);
       });
     },

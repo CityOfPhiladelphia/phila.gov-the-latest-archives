@@ -319,6 +319,42 @@ export default {
           langCode: "arabic",
           langName: "عربى",
         },
+        {
+          langCode: 'bengali',
+          langName: 'বাংলা',
+        },
+        {
+          langCode: 'haitian',
+          langName: 'Ayisyen',
+        },
+        {
+          langCode: 'hindo',
+          langName: 'Hindo',
+        },
+        {
+          langCode: 'indonesian', 
+          langName: 'Bahasa Indonesia',
+        },
+        {
+          langCode: 'urdu', 
+          langName: 'اردو',
+        },
+        {
+          langCode: 'korean', 
+          langName: '한국어',
+        },
+        {
+          langCode: 'khmer', 
+          langName: 'ខ្មែរ',
+        },
+        {
+          langCode: 'portuguese', 
+          langName: 'Português',
+        },
+        {
+          langCode: 'swahili',
+          langName: 'Kiswahili',
+        },
       ],
       search: '',
       department: '',

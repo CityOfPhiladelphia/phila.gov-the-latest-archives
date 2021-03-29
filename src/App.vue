@@ -233,12 +233,6 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-// const endpoint =
-//   "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
-
-const endpoint =
-  "https://www.phila.gov/wp-json/the-latest/v1/";
-
 export default {
   name: "Archives",
   components: { 
@@ -267,6 +261,11 @@ export default {
   },
   data: function() {
     return {
+      api: {
+        url: process.env.VUE_APP_API_URL,
+        endpoint: process.env.VUE_APP_API_ENDPOINT,
+      },
+
       posts: [],
       filteredPosts: [],
       
@@ -486,9 +485,10 @@ export default {
     * @desc fetches all archives posts from endpoint & calls filter posts to 
     */
     getAllPosts: function() {
+      let vm = this;
       {
         axios
-          .get(endpoint + "archives", {
+          .get(vm.api.url+vm.api.endpoint + "archives", {
             params: {
               count: -1,
             },
@@ -512,9 +512,10 @@ export default {
     * @desc fetches all the departments from the categories endpoint
     */
     getAllCategories: function() {
+      let vm = this;
       {
         axios
-          .get(endpoint + "categories")
+          .get(vm.api.url+vm.api.endpoint + "categories")
           .then(response => {
             this.endpointCategories = response.data;
           })

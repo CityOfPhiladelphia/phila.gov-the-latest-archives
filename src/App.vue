@@ -254,12 +254,16 @@ export default {
         return "Featured";
       } else if (value === "press_release") {
         return "Press Release";
+      } else if (value === "translated_press_release") {
+        return "Press Release";
+      } else if (value === "translated_post") {
+        return "Post";
       } else if (value === "news_post") {
         return "Post";
       }
     },
   },
-  data: function() {
+  data () {
     return {
       api: {
         url: process.env.VUE_APP_API_URL,
@@ -405,21 +409,21 @@ export default {
     };
   },
   computed: { 
-    sortTitle: function(){
+    sortTitle (){
       if (this.currentSort == 'title') {
         return this.currentSortDir;
       } 
       return "";
       
     },
-    sortDate: function(){
+    sortDate (){
       if (this.currentSort == 'date'){
         return this.currentSortDir;
       } 
       return "";
     },
 
-    disabledEndDate: function(){
+    disabledEndDate (){
       if (this.start == '')  {
         return this.disabledStartDate;
       } else if (this.start) {
@@ -483,7 +487,12 @@ export default {
     async init() {
       let vm = this;
       await vm.getAllPosts();
+      // await vm.handleTranslatedContent();
+      await vm.getDropdownCategories();
+      await vm.initFilters();
+      await vm.filterPosts();
       await vm.getAllCategories();
+      vm.loading = false;
     },
     async getAllPosts () {
       let vm = this;
@@ -493,16 +502,14 @@ export default {
           count: 50,
         },
       })
-        .then(response => {
-          this.posts = response.data;
-          this.getDropdownCategories();
-          this.initFilters();
-          this.filterPosts();
-          this.loading = false;
+        .then(async (response) => {
+          vm.posts = await vm.handleTranslatedContent( response.data );
+          return true;
         })
         .catch(() => {
           this.failure = true;
           this.loading = false;
+          return false;
         });
     },
 
@@ -523,7 +530,7 @@ export default {
     * @desc makes a list of all the departments from the fetched posts, and compares them to the
     * ones from the endpoint. if the department is in both arrays, it will add it to the categories array
     */
-    getDropdownCategories: function () {
+    async getDropdownCategories () {
       this.posts.forEach((post) => {
         post.categories.forEach((category) => {
           let newCategory = category.slang_name;
@@ -551,14 +558,13 @@ export default {
       }
     },
 
-    filterByLanguage: function() {
+    filterByLanguage () {
       if (this.language) {
         this.filteredPosts = [];
         // let selectedLang = this.languages.filter(langObj => {
         //   return langObj.langName == this.langauge; 
         // });
 
-        // console.log(selectedLang);
         this.filteredPosts = this.langPosts.filter(post => {
           return post.language == this.language.langCode;
         });
@@ -569,7 +575,7 @@ export default {
 
     },
 
-    checkEmpty: function() {
+    checkEmpty () {
       if (this.filteredPosts.length === 0) {
         this.emptyResponse = true;
       } else {
@@ -601,7 +607,7 @@ export default {
       }
     },
 
-    filterBySearch: function() {
+    filterBySearch () {
       if (this.search !== '') { // there is nothing in the search bar -> return everything in filteredPosts
         this.searchPosts = [];
         this.$search(this.search, this.templatePosts, this.searchOptions).then(posts => {
@@ -612,7 +618,7 @@ export default {
       }
     },
 
-    filterByDepartment: function() {
+    filterByDepartment () {
       if (this.department !== '' && this.department !== null) { 
         this.departmentPosts = this.posts.filter(post => {
           return post.categories.find(category => {
@@ -626,7 +632,7 @@ export default {
       }  
     },
 
-    filterByTemplate: function() {
+    filterByTemplate () {
       if (this.templates.length !== 0) {
         this.templatePosts = [];
         this.departmentPosts.forEach((post) => {
@@ -638,11 +644,37 @@ export default {
         this.templatePosts = this.departmentPosts;
       } 
     },
-    
+    async handleTranslatedContent ( posts ) {
+      let vm = this;
+      let tempPosts = [];
+      for (let item of posts) {
+        if (item.translated_content && (item.template == 'translated_press_release' || item.template == 'translated_post') ) {
+          for (let post of item.translated_content) {
+            let tempPost = {};
+            tempPost.title = post.phila_custom_wysiwyg.phila_wysiwyg_title;
+            tempPost.language =post.translated_language;
+            tempPost.categories = item.categories;
+            tempPost.date = item.date;
+            if (item.template == 'translated_press_release') {
+              tempPost.template = 'press_release';
+            } else if (item.template == 'translated_post') {
+              tempPost.template = 'post';
+            } else {
+              tempPost.template = item.template;
+            }
+            tempPost.link = item.link+'?'+post.translated_language;
+            tempPosts.push(tempPost);
+          }
+        } else {
+          tempPosts.push(item);
+        }
+      }
+      return tempPosts;
+    },
     /**
     * @desc calls all the filter helper functions in order
     */
-    filterPosts: async function () {
+    async filterPosts () {
       await this.filterByDepartment();
       await this.filterByTemplate();
       await this.filterBySearch();
@@ -693,7 +725,7 @@ export default {
       this.sortPosts();
     },
 
-    sortPosts: function() {
+    sortPosts () {
       this.filteredPosts = this.filteredPosts.sort((a,b) => {
         let modifier = 1;
         if(this.currentSortDir === 'desc') {
@@ -712,7 +744,7 @@ export default {
     /**
     * @desc fetches all query params from the route and inputs it into the data of app
     */
-    initFilters: function() {
+    async initFilters () {
       if (Object.keys(this.$route.query).length !== 0) {
         for (let routerKey in this.$route.query) {
           if(routerKey === "templates"){
@@ -780,7 +812,6 @@ export default {
         name: 'main',
         query: this.routerQuery,
       }).catch(() => {
-        // window.console.log(e);
       });
     },
   },

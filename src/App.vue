@@ -487,7 +487,6 @@ export default {
     async init() {
       let vm = this;
       await vm.getAllPosts();
-      // await vm.handleTranslatedContent();
       await vm.getDropdownCategories();
       await vm.initFilters();
       await vm.filterPosts();
@@ -531,19 +530,21 @@ export default {
     * ones from the endpoint. if the department is in both arrays, it will add it to the categories array
     */
     async getDropdownCategories () {
-      this.posts.forEach((post) => {
+      let vm = this;
+      vm.posts.forEach((post) => {
+        // console.log(post);
         post.categories.forEach((category) => {
           let newCategory = category.slang_name;
           if (newCategory !== '') {
-            this.categories.push(newCategory);
+            vm.categories.push(newCategory);
           }
         });
       });
-      this.categories = this.categories.filter((item, index) => this.categories.indexOf(item) === index);
-      this.endpointCategories.forEach((category) => {
-        this.endpointCategoriesSlang.push(category.slang_name);
-      });
-      this.categories = this.categories.filter((category) => this.endpointCategoriesSlang.includes(category)).sort();
+      vm.categories = [ ...new Set(vm.categories) ].sort();
+      // this.endpointCategories.forEach((category) => {
+      //   this.endpointCategoriesSlang.push(category.slang_name);
+      // });
+      // this.categories = this.categories.filter((category) => this.endpointCategoriesSlang.includes(category)).sort();
     },
   
 

@@ -952,5 +952,4 @@ tr td:last-child {
     width: 90% !important;
   }
 }
-
 </style>

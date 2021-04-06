@@ -269,7 +269,7 @@ export default {
         url: process.env.VUE_APP_API_URL,
         endpoint: process.env.VUE_APP_API_ENDPOINT,
       },
-
+      itemCount: process.env.VUE_APP_COUNT,
       posts: [],
       filteredPosts: [],
       
@@ -497,8 +497,7 @@ export default {
       let vm = this;
       return axios.get(vm.api.url+vm.api.endpoint + "archives", {
         params: {
-          // count: -1,
-          count: 50,
+          count: vm.itemCount,
         },
       })
         .then(async (response) => {

@@ -497,8 +497,8 @@ export default {
       let vm = this;
       return axios.get(vm.api.url+vm.api.endpoint + "archives", {
         params: {
-          count: -1,
-          // count: 50,
+          // count: -1,
+          count: 50,
         },
       })
         .then(async (response) => {

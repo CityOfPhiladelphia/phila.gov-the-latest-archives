@@ -500,6 +500,11 @@ export default {
         params: {
           count: vm.itemCount,
         },
+        config: {
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+          }
+        },
       })
         .then(async (response) => {
           vm.posts = await vm.handleTranslatedContent( response.data );

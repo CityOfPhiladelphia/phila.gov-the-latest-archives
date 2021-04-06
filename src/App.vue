@@ -267,7 +267,8 @@ export default {
     return {
       api: {
         url: process.env.VUE_APP_API_URL,
-        endpoint: process.env.VUE_APP_API_ENDPOINT,
+        endpoint_v1: process.env.VUE_APP_API_V1_ENDPOINT,
+        endpoint_v2: process.env.VUE_APP_API_V2_ENDPOINT,
       },
       itemCount: process.env.VUE_APP_COUNT,
       posts: [],
@@ -495,7 +496,7 @@ export default {
     },
     async getAllPosts () {
       let vm = this;
-      return axios.get(vm.api.url+vm.api.endpoint + "archives", {
+      return axios.get(vm.api.url+vm.api.endpoint_v2 + "archives", {
         params: {
           count: vm.itemCount,
         },
@@ -516,7 +517,7 @@ export default {
     */
     async getAllCategories () {
       let vm = this;
-      return axios.get(vm.api.url+vm.api.endpoint + "categories")
+      return axios.get(vm.api.url+vm.api.endpoint_v1 + "categories")
         .then(response => {
           this.endpointCategories = response.data;
         })

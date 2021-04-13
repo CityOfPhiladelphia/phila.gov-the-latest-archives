@@ -25,47 +25,56 @@
       <div class="h5">
         Filter results
       </div>
-      <fieldset>
-        <div class="grid-x grid-margin-x mbl">
-          <div
-            v-for="(value, key) in templatesList"
-            :key="key"
-            class="cell medium-auto filter-box"
-          >
-            <input
-              :id="key"
-              v-model="templates"
-              type="checkbox"
-              :value="key"
-              :name="key"
-            >
-            <label
-              :for="key"
-              class="post-label"
-              :class="'post-label--' + key"
-            >{{ value }}</label>
-          </div>
+      <div class="grid-x">
+        <div class="cell medium-16 small-24">
+          <fieldset>
+            <div class="grid-x grid-margin-x mbl">
+              <div
+                v-for="(value, key) in templatesList"
+                :key="key"
+                class="cell medium-auto filter-box"
+              >
+                <input
+                  :id="key"
+                  v-model="templates"
+                  type="checkbox"
+                  :value="key"
+                  :name="key"
+                >
+                <label
+                  :for="key"
+                  class="post-label"
+                  :class="'post-label--' + key"
+                >{{ value }}</label>
+              </div>
+            </div>
+          </fieldset>
         </div>
-      </fieldset>
-      <fieldset>
-        <div class="grid-x grid-margin-x mbl">
-          <div
-            class="cell medium-auto filter-box"
-          >
-            <input
-              v-model="featured"
-              type="checkbox"
-              name="featured"
-            >
-            <label
-              for="featured"
-              class="post-label"
-              :class="'post-label--featured'"
-              @click="toggleFeatured"
-            >Featured</label>
-          </div>
+        <div
+          v-if="templatesPostOnly()"
+          class="cell medium-24 small-24 featured-posts"
+        >
+          <fieldset>
+            <div class="grid-x grid-margin-x mbl"> 
+              <div
+                class="cell medium-auto filter-box "
+              >
+                <input
+                  v-model="featured"
+                  type="checkbox"
+                  name="featured"
+                >
+                <label
+                  for="featured"
+                  class="post-label"
+                  :class="'post-label--featured'"
+                  @click="toggleFeatured"
+                >Featured posts</label>
+              </div>
+            </div>
+          </fieldset>
         </div>
-      </fieldset>
+      </div>
       <div class="grid-x grid-margin-x">
         <div class="cell medium-4 small-10">
           <datepicker
@@ -118,7 +127,7 @@
             @input="filterPosts()"
           />
         </div>
-        <div class="cell medium-4 small-24">
+        <div class="cell medium-5 small-24">
           <a
             class="button content-type-featured full"
             @click="clearAllFilters()"
@@ -461,6 +470,9 @@ export default {
     },
 
     templates (value) {
+      if(!this.templatesPostOnly()) {
+        this.setFeaturedFalse();
+      }
       this.filterPosts();
       this.updateRouterQuery('templates', value);
     },
@@ -677,7 +689,6 @@ export default {
       } 
     },
     async handleTranslatedContent ( posts ) {
-      let vm = this;
       let tempPosts = [];
       for (let item of posts) {
         if (item.translated_content && (item.template == 'translated_press_release' || item.template == 'translated_post') ) {
@@ -859,6 +870,14 @@ export default {
       let vm = this;
       vm.featured = !vm.featured;
     },
+    templatesPostOnly() {
+      let vm = this;
+      return vm.templates.includes('post') && vm.templates.length == 1;
+    },
+    setFeaturedFalse() {
+      let vm = this;
+      vm.featured = false;
+    }
   },
 };
 </script>
@@ -866,137 +885,145 @@ export default {
 <style lang="scss">
 
 @import 'node_modules/vue-select/dist/vue-select';
-
-.cell.medium-1.small-2.mts {
-  text-align: center;
-}
-.search, .pam, .table-container {
-  width: 75%;
-  margin: 0 auto;
-  max-width: 1000px;
-}
-
-.post-title {
-  text-align: center;
-  display: block;
-  margin: 0 auto;
-}
-
-.paginate-links {
-  float: right;
-}
-
-.post-label, .table-sort {
-  user-select: none;
-}
-
-tr td:first-child {
-  min-width: 50%;
-}
-
-tr td:last-child {
-  max-width: 30%;
-}
-
-.filter-by-owner{
-  font-family:"Open Sans", Helvetica, Roboto, Arial, sans-serif !important;
-}
-.filter-by-owner .v-select .vs__dropdown-toggle {
-  border:none;
-  background:white;
-}
-.filter-by-owner .v-select .vs__open-indicator path{
-  bottom:0;
-  top:0;
-  right:0;
-  background: #0f4d90;
-  padding: 0 0 0 9px;
-  width: 30px;
-  height:100%;
-  fill: #0f4d90;
-}
-
-.v-select .vs__actions{
-  padding:0 5px 0 0;
-}
-
-.v-select .vs__search {
- color: #a1a1a1;
- background: white;
-}
-
-.vs__selected {
-  position: absolute;
-
-}
-.vs__clear:hover {
-  background-color: transparent;
-}
-
-.v-select .vs__dropdown-toggle{
-  border-radius: 0;
-  padding:0;
-}
-
-#dept-filter .v-select .vs__dropdown-menu{
- width: 400px;
-}
-
-.filter-by-owner .v-select input[type=search],
-.v-select input[type=search]:focus{
-  border:none;
-}
-.filter-by-owner .v-select .vs__open-indicator{
-  border-color:white;
-  cursor: pointer;
-}
-.filter-by-owner .v-select input[type=search],
-.filter-by-owner .v-select input[type=search]:focus {
-  height: 2.4rem;
-  margin:0;
-}
-.filter-by-owner ul.vs__dropdown-menu{
-  border:none;
-  font-weight: bold;
-  overflow-x: hidden;
-}
-.filter-by-owner ul.vs__dropdown-menu li{
-  border-bottom: 1px solid #f0f0f0;
-  padding: 15px 0 15px 10px;
-}
-
-.vdp-datepicker [type='text'] {
-  height: 2.4rem;
-}
-.vdp-datepicker input:read-only{
-  background: white;
-  cursor: pointer;
-}
-#archive-results .vdp-datepicker__calendar .cell.selected,
-#archive-results .vdp-datepicker__calendar .cell.selected.highlighted,
-#archive-results .vdp-datepicker__calendar .cell.selected:hover {
-  background: #25cef7;
-}
-
-.vs__dropdown-option--highlight.vs__dropdown-option{
-  background: #0f4d90;
-  color: white;
-}
-
-@media screen and (max-width: 750px) {
+#archives {
+  .cell.medium-1.small-2.mts {
+    text-align: center;
+  }
   .search, .pam, .table-container {
-    width: 96%;
-  }
-  .post-type {
-    display: none;
-  }
-
-  .cell.medium-auto.filter-box {
-    width: 40%;
+    width: 75%;
+    margin: 0 auto;
+    max-width: 1000px;
   }
 
-  .filter-by-owner {
-    width: 90% !important;
+  .post-title {
+    text-align: center;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .paginate-links {
+    float: right;
+  }
+
+  .post-label, .table-sort {
+    user-select: none;
+  }
+  .post-label {
+    margin-left: 0px;
+  }
+
+  tr td:first-child {
+    min-width: 50%;
+  }
+
+  tr td:last-child {
+    max-width: 30%;
+  }
+
+  .filter-by-owner{
+    font-family:"Open Sans", Helvetica, Roboto, Arial, sans-serif !important;
+  }
+  .filter-by-owner .v-select .vs__dropdown-toggle {
+    border:none;
+    background:white;
+  }
+  .filter-by-owner .v-select .vs__open-indicator path{
+    bottom:0;
+    top:0;
+    right:0;
+    background: #0f4d90;
+    padding: 0 0 0 9px;
+    width: 30px;
+    height:100%;
+    fill: #0f4d90;
+  }
+
+  .v-select .vs__actions{
+    padding:0 5px 0 0;
+  }
+
+  .v-select .vs__search {
+  color: #a1a1a1;
+  background: white;
+  }
+
+  .vs__selected {
+    position: absolute;
+
+  }
+  .vs__clear:hover {
+    background-color: transparent;
+  }
+
+  .v-select .vs__dropdown-toggle{
+    border-radius: 0;
+    padding:0;
+  }
+
+  #dept-filter .v-select .vs__dropdown-menu{
+  width: 400px;
+  }
+
+  .filter-by-owner .v-select input[type=search],
+  .v-select input[type=search]:focus{
+    border:none;
+  }
+  .filter-by-owner .v-select .vs__open-indicator{
+    border-color:white;
+    cursor: pointer;
+  }
+  .filter-by-owner .v-select input[type=search],
+  .filter-by-owner .v-select input[type=search]:focus {
+    height: 2.4rem;
+    margin:0;
+  }
+  .filter-by-owner ul.vs__dropdown-menu{
+    border:none;
+    font-weight: bold;
+    overflow-x: hidden;
+  }
+  .filter-by-owner ul.vs__dropdown-menu li{
+    border-bottom: 1px solid #f0f0f0;
+    padding: 15px 0 15px 10px;
+  }
+
+  .vdp-datepicker [type='text'] {
+    height: 2.4rem;
+  }
+  .vdp-datepicker input:read-only{
+    background: white;
+    cursor: pointer;
+  }
+  #archive-results .vdp-datepicker__calendar .cell.selected,
+  #archive-results .vdp-datepicker__calendar .cell.selected.highlighted,
+  #archive-results .vdp-datepicker__calendar .cell.selected:hover {
+    background: #25cef7;
+  }
+
+  .vs__dropdown-option--highlight.vs__dropdown-option{
+    background: #0f4d90;
+    color: white;
+  }
+
+  @media screen and (max-width: 750px) {
+    .search, .pam, .table-container {
+      width: 96%;
+    }
+    .post-type {
+      display: none;
+    }
+
+    .cell.medium-auto.filter-box {
+      width: 40%;
+    }
+
+    .filter-by-owner {
+      width: 90% !important;
+    }
+  }
+  .featured-posts {
+    margin-top: -45px;
   }
 }
+
 </style>

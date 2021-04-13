@@ -47,6 +47,25 @@
           </div>
         </div>
       </fieldset>
+      <fieldset>
+        <div class="grid-x grid-margin-x mbl">
+          <div
+            class="cell medium-auto filter-box"
+          >
+            <input
+              v-model="featured"
+              type="checkbox"
+              name="featured"
+            >
+            <label
+              for="featured"
+              class="post-label"
+              :class="'post-label--featured'"
+              @click="toggleFeatured"
+            >Featured</label>
+          </div>
+        </div>
+      </fieldset>
       <div class="grid-x grid-margin-x">
         <div class="cell medium-4 small-10">
           <datepicker
@@ -250,8 +269,6 @@ export default {
         return "Action Guide";
       } else if (value === "post") {
         return "Post";
-      } else if (value === "featured") {
-        return "Featured";
       } else if (value === "press_release") {
         return "Press Release";
       } else if (value === "translated_press_release") {
@@ -280,6 +297,7 @@ export default {
       departmentPosts: [],
       tagPosts: [],
       langPosts: [],
+      featuredPosts: [],
       
       endpointCategories: [],
       endpointCategoriesSlang: [],
@@ -288,6 +306,7 @@ export default {
       loading: true,
       emptyResponse: false,
       failure: false,
+      featured: false,
 
       currentSort:'date',
       currentSortDir: 'desc',
@@ -393,7 +412,6 @@ export default {
       },
 
       templatesList: {
-        featured: "Featured",
         post: "Posts",
         action_guide: "Action guides",
         press_release: "Press releases",
@@ -447,6 +465,11 @@ export default {
       this.updateRouterQuery('templates', value);
     },
 
+    featured (value) {
+      this.filterPosts();
+      this.updateRouterQuery('featured', value);
+    },
+
     start (value) {
       if (value) {
         this.updateRouterQuery('start',  moment(value).unix());
@@ -460,15 +483,13 @@ export default {
       } else {
         this.disabledStartDate.from = new Date(Date.now());
         this.disabledEndDate.from = new Date(Date.now());
-      }        
-     
+      }
     },
 
     language (value) {
       if (value) {
         this.updateRouterQuery('language', value.langCode);
-      }       
-     
+      }
     },
 
     routerQuery: {
@@ -548,7 +569,7 @@ export default {
     },
   
 
-    filterByTag: function () {
+    async filterByTag () {
       if (this.tag !== '') { // there is nothing in the tag URL
         this.langPosts = [];
         this.$search(this.tag, this.tagPosts, this.tagOptions).then(posts => {
@@ -559,19 +580,29 @@ export default {
       }
     },
 
-    filterByLanguage () {
+    async filterByLanguage () {
       if (this.language) {
-        this.filteredPosts = [];
-        // let selectedLang = this.languages.filter(langObj => {
-        //   return langObj.langName == this.langauge; 
-        // });
+        this.featuredPosts = [];
 
-        this.filteredPosts = this.langPosts.filter(post => {
+        this.featuredPosts = this.langPosts.filter(post => {
           return post.language == this.language.langCode;
         });
         
       } else {
-        this.filteredPosts = this.langPosts;
+        this.featuredPosts = this.langPosts;
+      }
+
+    },
+
+    async filterByFeatured () {
+      let vm = this;
+      if (vm.featured == true) {
+        vm.filteredPosts = [];
+
+        vm.filteredPosts = vm.featuredPosts.filter(post => (Boolean(post.featured) && post.featured == '1'));
+        
+      } else {
+        vm.filteredPosts = vm.featuredPosts;
       }
 
     },
@@ -682,6 +713,7 @@ export default {
       await this.filterByDate();
       await this.filterByTag();
       await this.filterByLanguage();
+      await this.filterByFeatured();
       await this.checkEmpty();
     },
 
@@ -764,6 +796,14 @@ export default {
             this.language = setLang[0];
 
             // Vue.set(this, routerKey, this.$route.query[routerKey]);
+          } else if (routerKey == "featured") {
+
+            if (this.$route.query[routerKey] == "true") {
+              this.featured = true;
+            } else {
+              this.featured = false;
+            }
+
           } else {
             Vue.set(this, routerKey, this.$route.query[routerKey]);
           }
@@ -814,6 +854,10 @@ export default {
         query: this.routerQuery,
       }).catch(() => {
       });
+    },
+    toggleFeatured() {
+      let vm = this;
+      vm.featured = !vm.featured;
     },
   },
 };

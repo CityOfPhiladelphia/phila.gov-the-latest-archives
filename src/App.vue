@@ -44,7 +44,7 @@
                 <label
                   :for="key"
                   class="post-label"
-                  :class="'post-label--' + key"
+                  v-bind:class="[{ disabled: (featured == true && key != 'post') },  ' post-label--' + key]"
                 >{{ value }}</label>
               </div>
             </div>
@@ -877,7 +877,7 @@ export default {
     setFeaturedFalse() {
       let vm = this;
       vm.featured = false;
-    }
+    },
   },
 };
 </script>

@@ -867,6 +867,9 @@ export default {
 
 @import 'node_modules/vue-select/dist/vue-select';
 
+.cell.medium-1.small-2.mts {
+  text-align: center;
+}
 .search, .pam, .table-container {
   width: 75%;
   margin: 0 auto;

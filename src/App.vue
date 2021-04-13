@@ -44,7 +44,7 @@
                 <label
                   :for="key"
                   class="post-label"
-                  v-bind:class="[{ disabled: (featured == true && key != 'post') },  ' post-label--' + key]"
+                  :class="[{ disabled: (featured == true && key != 'post') }, ' post-label--' + key]"
                 >{{ value }}</label>
               </div>
             </div>

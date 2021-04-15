@@ -694,19 +694,21 @@ export default {
         if (item.translated_content && (item.template == 'translated_press_release' || item.template == 'translated_post') ) {
           for (let post of item.translated_content) {
             let tempPost = {};
-            tempPost.title = post.phila_custom_wysiwyg.phila_wysiwyg_title;
-            tempPost.language =post.translated_language;
-            tempPost.categories = item.categories;
-            tempPost.date = item.date;
-            if (item.template == 'translated_press_release') {
-              tempPost.template = 'press_release';
-            } else if (item.template == 'translated_post') {
-              tempPost.template = 'post';
-            } else {
-              tempPost.template = item.template;
+            if( post.phila_custom_wysiwyg && post.phila_custom_wysiwyg.phila_wysiwyg_title ) {
+              tempPost.title = post.phila_custom_wysiwyg.phila_wysiwyg_title;
+              tempPost.language =post.translated_language;
+              tempPost.categories = item.categories;
+              tempPost.date = item.date;
+              if (item.template == 'translated_press_release') {
+                tempPost.template = 'press_release';
+              } else if (item.template == 'translated_post') {
+                tempPost.template = 'post';
+              } else {
+                tempPost.template = item.template;
+              }
+              tempPost.link = item.link+'?'+post.translated_language;
+              tempPosts.push(tempPost);
             }
-            tempPost.link = item.link+'?'+post.translated_language;
-            tempPosts.push(tempPost);
           }
         } else {
           tempPosts.push(item);

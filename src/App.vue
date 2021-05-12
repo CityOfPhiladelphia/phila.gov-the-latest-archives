@@ -53,7 +53,7 @@
             v-model="start"
             name="start"
             placeholder="Start date"
-            format="MMM. dd, yyyy"
+            format="MMM dd, yyyy"
             
             :disabled-dates="disabledStartDate"
             @closed="filterPosts()"
@@ -67,7 +67,7 @@
             v-model="end"
             name="end"
             placeholder="End date"
-            format="MMM. dd, yyyy"
+            format="MMM dd, yyyy"
             :disabled-dates="disabledEndDate"
             
             @closed="filterPosts()"
@@ -248,7 +248,7 @@ export default {
   filters: {
     'formatDate': function(value) {
       if (value) {
-        return moment(String(value)).format('MMM. DD, YYYY');
+        return moment(String(value)).format('MMM DD, YYYY');
       }
     },
     'formatTemplate': function(value) {

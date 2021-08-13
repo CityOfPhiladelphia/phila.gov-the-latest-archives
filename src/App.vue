@@ -323,6 +323,10 @@ export default {
           langName: 'বাংলা',
         },
         {
+          langCode: 'burmese',
+          langName: 'မြန်မာ',
+        },
+        {
           langCode: 'haitian',
           langName: 'Ayisyen',
         },

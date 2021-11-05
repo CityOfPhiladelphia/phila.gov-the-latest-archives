@@ -858,10 +858,15 @@ tr td:last-child {
 
 .vs__selected {
   position: absolute;
-
+  z-index: 10;
 }
 .vs__clear:hover {
   background-color: transparent;
+}
+
+.v-select .vs__dropdown-toggle{
+  border-radius: 0;
+  padding:0;
 }
 
 .v-select .vs__dropdown-toggle{

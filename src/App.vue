@@ -790,7 +790,7 @@ export default {
         name: 'main',
         query: this.routerQuery,
       }).catch(e => {
-        // window.console.log(e);
+        window.console.log(e);
       });
     },
   },

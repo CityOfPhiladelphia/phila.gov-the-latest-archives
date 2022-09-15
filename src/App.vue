@@ -178,11 +178,13 @@
             @click.stop.prevent="goToPost(post.link)"
           >
             <td class="title">
+              
               <a
                 :href="post.link"
                 target="_blank"
                 @click.prevent="goToPost(post.link)"
               >
+              <span v-if="post.archived" class="archived-tag">Archived</span>
                 {{ post.title }}
               </a>
             </td>
@@ -236,7 +238,8 @@ Vue.use(VueFuse);
 // const endpoint =
 //   "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
 
-const endpoint = "https://api.phila.gov/phila/the-latest/v1/";
+// const endpoint = "https://api.phila.gov/phila/the-latest/v1/";
+const endpoint = "https://staging-admin.phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",
@@ -396,6 +399,7 @@ export default {
         post: "Posts",
         action_guide: "Action guides",
         press_release: "Press releases",
+        archived: "Archived",
       },
 
       
@@ -941,6 +945,15 @@ tr td:last-child {
   .filter-by-owner {
     width: 90% !important;
   }
+}
+
+.archived-tag {
+  background-color: #444;
+  display: inline;
+  color: white;
+  padding: 3px 10px;
+  font-weight: bold;
+  vertical-align: text-bottom;
 }
 
 </style>

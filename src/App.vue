@@ -179,9 +179,9 @@
           >
             <td class="title">
               <span
-                  v-if="post.archived"
-                  class="archived-tag"
-                >
+                v-if="post.archived"
+                class="archived-tag"
+              >
                 Archived
               </span>
               <a
@@ -372,7 +372,6 @@ export default {
       start: '',
       end: '',
       language: '',
-      
       searchOptions: {
         shouldSort: false, 
         threshold: 0.5, 
@@ -382,25 +381,10 @@ export default {
           'tags.name',
         ],
       },
-      tagOptions: {
-        shouldSort: false,
-        threshold: 0.0,
-        keys: [
-          'tags.name',
-          'tags.slug',
-        ],
-      },
-      templateOptions: {
-        shouldSort: false,
-        threshold: 0.0, 
-        keys: [
-          'template',
-        ],
-      },
-
       templatesList: {
         featured: "Featured",
         post: "Posts",
+        archived: "Archived",
         action_guide: "Action guides",
         press_release: "Press releases",
       },
@@ -557,9 +541,8 @@ export default {
     filterByTag: function () {
       if (this.tag !== '') { // there is nothing in the tag URL
         this.langPosts = [];
-        this.$search(this.tag, this.tagPosts, this.tagOptions).then(posts => {
-          this.langPosts = posts;
-        });
+        //need to filter out sentence case
+        this.langPosts = this.tagPosts.filter(x=>x.tags.some((tag) => tag.name == this.tag));
       } else {
         this.langPosts = this.tagPosts;
       }
@@ -568,11 +551,6 @@ export default {
     filterByLanguage: function() {
       if (this.language) {
         this.filteredPosts = [];
-        // let selectedLang = this.languages.filter(langObj => {
-        //   return langObj.langName == this.langauge; 
-        // });
-
-        // console.log(selectedLang);
         this.filteredPosts = this.langPosts.filter(post => {
           return post.language == this.language.langCode;
         });
@@ -643,7 +621,19 @@ export default {
     filterByTemplate: function() {
       if (this.templates.length !== 0) {
         this.templatePosts = [];
-        this.departmentPosts.forEach((post) => {
+        var tempPosts = [];
+        if (this.templates.indexOf("archived") > -1 && this.templates.length == 1) {
+          this.templatePosts = this.departmentPosts.filter(x =>
+            x.archived == true);
+          return;
+        } else if (this.templates.indexOf("archived") > -1){
+          tempPosts = this.departmentPosts.filter(x =>
+            x.archived == true);
+        } else {
+          tempPosts = this.departmentPosts;
+        }
+        
+        tempPosts.forEach((post) => {
           if (this.templates.includes(post.template)) {
             this.templatePosts.push(post);
           }
@@ -657,6 +647,9 @@ export default {
     * @desc calls all the filter helper functions in order
     */
     filterPosts: async function () {
+
+      // this.filteredEvents = [];
+
       await this.filterByDepartment();
       await this.filterByTemplate();
       await this.filterBySearch();
@@ -955,6 +948,7 @@ tr td:last-child {
   padding: 3px 10px;
   font-weight: bold;
   vertical-align: text-bottom;
+  margin-right: 3px;
 }
 
 </style>

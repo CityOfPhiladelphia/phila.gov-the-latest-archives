@@ -479,7 +479,7 @@ export default {
         axios
           .get(endpoint + "archives", {
             params: {
-              count: 200,
+              count: -1,
             },
           })
           .then(response => {
@@ -645,9 +645,6 @@ export default {
     * @desc calls all the filter helper functions in order
     */
     filterPosts: async function () {
-
-      // this.filteredEvents = [];
-
       await this.filterByDepartment();
       await this.filterByTemplate();
       await this.filterBySearch();

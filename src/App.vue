@@ -552,9 +552,9 @@ export default {
     filterByTag: function () {
       if (this.tag !== '') { // there is nothing in the tag URL
         this.langPosts = [];
-        this.$search(this.tag, this.tagPosts, this.tagOptions).then(posts => {
-          this.langPosts = posts;
-        });
+          //need to filter out posts that have no tags
+        let tempPosts = this.tagPosts.filter(x=>x.tags[0] !== false );
+        this.langPosts = tempPosts.filter(x=>x.tags.some((tag) => tag.name.toLowerCase() == this.tag.toLowerCase()));
       } else {
         this.langPosts = this.tagPosts;
       }

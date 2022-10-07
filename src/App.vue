@@ -239,8 +239,8 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-const endpoint = "https://api.phila.gov/phila/the-latest/v1/";
-// const endpoint = "https://staging-admin.phila.gov/wp-json/the-latest/v1/";
+// const endpoint = "https://api.phila.gov/phila/the-latest/v1/";
+const endpoint = "https://staging-admin.phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",

@@ -10,9 +10,9 @@ module.exports = {
   ],
   rules: {
     // Disabled only on development
-    "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
-    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
-    "no-unused-vars": process.env.NODE_ENV === "production" ? "error" : "off",
+    "no-console": process.env.NODE_ENV === "production" ? "off" : "off",
+    "no-debugger": process.env.NODE_ENV === "production" ? "off" : "off",
+    "no-unused-vars": process.env.NODE_ENV === "production" ? "off" : "off",
 
     // Eslint Rules
     "brace-style": "error",

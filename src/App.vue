@@ -48,12 +48,12 @@
         </div>
       </fieldset>
       <div class="grid-x grid-margin-x">
-        <div class="cell medium-4 small-11">
+        <div class="cell medium-4 small-10">
           <datepicker
             v-model="start"
             name="start"
             placeholder="Start date"
-            format="MMM. dd, yyyy"
+            format="MMM dd, yyyy"
             
             :disabled-dates="disabledStartDate"
             @closed="filterPosts()"
@@ -62,18 +62,34 @@
         <div class="cell medium-1 small-2 mts">
           <i class="fas fa-arrow-right" />
         </div>
-        <div class="cell medium-4 small-11">
+        <div class="cell medium-4 small-10">
           <datepicker
             v-model="end"
             name="end"
             placeholder="End date"
-            format="MMM. dd, yyyy"
+            format="MMM dd, yyyy"
             :disabled-dates="disabledEndDate"
             
             @closed="filterPosts()"
           />
         </div>
-        <div class="cell medium-11 small-24 auto filter-by-owner">
+        <div 
+          id="lang-filter"
+          class="cell medium-5 small-2 filter-by-owner"
+        >
+          <v-select
+            ref="categorySelect"
+            v-model="language"
+            label="langName"
+            placeholder="Language"
+            :options="languages"
+            @input="filterPosts()"
+          />
+        </div>
+        <div 
+          id="dept-filter"
+          class="cell medium-5 small-24 auto filter-by-owner"
+        >
           <v-select
             ref="categorySelect"
             v-model="department"
@@ -162,6 +178,10 @@
             @click.stop.prevent="goToPost(post.link)"
           >
             <td class="title">
+              <span
+                v-if="post.archived"
+                class="archived-tag"
+              >Archived</span>
               <a
                 :href="post.link"
                 target="_blank"
@@ -217,11 +237,8 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-// const endpoint =
-//   "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
-
-const endpoint =
-  "https://www.phila.gov/wp-json/the-latest/v1/";
+// const endpoint = "https://api.phila.gov/phila/the-latest/v1/";
+const endpoint = "https://staging-admin.phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",
@@ -232,7 +249,7 @@ export default {
   filters: {
     'formatDate': function(value) {
       if (value) {
-        return moment(String(value)).format('MMM. DD, YYYY');
+        return moment(String(value)).format('MMM DD, YYYY');
       }
     },
     'formatTemplate': function(value) {
@@ -259,6 +276,7 @@ export default {
       searchPosts: [],
       departmentPosts: [],
       tagPosts: [],
+      langPosts: [],
       
       endpointCategories: [],
       endpointCategoriesSlang: [],
@@ -273,12 +291,82 @@ export default {
 
       templates: [],
       categories: [],
+      languages: [ 
+        {
+          langCode: "english",
+          langName: "English",
+        },
+        {
+          langCode: "spanish",
+          langName: "Español",
+        },
+        {
+          langCode: "chinese",
+          langName: "中文",
+        },
+        {
+          langCode: "vietnamese",
+          langName: "Tiếng Việt",
+        },
+        {
+          langCode: "russian",
+          langName: "Pусский",
+        },
+        {
+          langCode: "french",
+          langName: "Français",
+        },
+        {
+          langCode: "arabic",
+          langName: "عربى",
+        },
+        {
+          langCode: 'bengali',
+          langName: 'বাংলা',
+        },
+        {
+          langCode: 'burmese',
+          langName: 'မြန်မာ',
+        },
+        {
+          langCode: 'haitian',
+          langName: 'Ayisyen',
+        },
+        {
+          langCode: 'hindo',
+          langName: 'Hindo',
+        },
+        {
+          langCode: 'indonesian', 
+          langName: 'Bahasa Indonesia',
+        },
+        {
+          langCode: 'urdu', 
+          langName: 'اردو',
+        },
+        {
+          langCode: 'korean', 
+          langName: '한국어',
+        },
+        {
+          langCode: 'khmer', 
+          langName: 'ខ្មែរ',
+        },
+        {
+          langCode: 'portuguese', 
+          langName: 'Português',
+        },
+        {
+          langCode: 'swahili',
+          langName: 'Kiswahili',
+        },
+      ],
       search: '',
       department: '',
       tag: '',
       start: '',
       end: '',
-      
+      language: '',
       searchOptions: {
         shouldSort: false, 
         threshold: 0.5, 
@@ -288,27 +376,12 @@ export default {
           'tags.name',
         ],
       },
-      tagOptions: {
-        shouldSort: false,
-        threshold: 0.0,
-        keys: [
-          'tags.name',
-          'tags.slug',
-        ],
-      },
-      templateOptions: {
-        shouldSort: false,
-        threshold: 0.0, 
-        keys: [
-          'template',
-        ],
-      },
-
       templatesList: {
-        featured: "Featured",
         post: "Posts",
-        action_guide: "Action guides",
         press_release: "Press releases",
+        action_guide: "Action guides",
+        featured: "Featured",
+        archived: "Archived",
       },
 
       disabledStartDate: {
@@ -371,6 +444,13 @@ export default {
         this.disabledStartDate.from = new Date(Date.now());
         this.disabledEndDate.from = new Date(Date.now());
       }        
+     
+    },
+
+    language (value) {
+      if (value) {
+        this.updateRouterQuery('language', value.langCode);
+      }       
      
     },
 
@@ -451,16 +531,30 @@ export default {
       });
       this.categories = this.categories.filter((category) => this.endpointCategoriesSlang.includes(category)).sort();
     },
+  
 
     filterByTag: function () {
-      if (this.tag !== '') { // there is nothing in the tag URL
-        this.filteredPosts = [];
-        this.$search(this.tag, this.tagPosts, this.tagOptions).then(posts => {
-          this.filteredPosts = posts;
-        });
+      if (this.tag !== '') { // there is nothing in the tag query of the URL
+        this.langPosts = [];
+        //need to filter out posts that have no tags
+        let tempPosts = this.tagPosts.filter(x=>x.tags[0] !== false );
+        this.langPosts = tempPosts.filter(x=>x.tags.some((tag) => tag.name.toLowerCase() == this.tag.toLowerCase()));
       } else {
-        this.filteredPosts = this.tagPosts;
+        this.langPosts = this.tagPosts;
       }
+    },
+
+    filterByLanguage: function() {
+      if (this.language) {
+        this.filteredPosts = [];
+        this.filteredPosts = this.langPosts.filter(post => {
+          return post.language == this.language.langCode;
+        });
+        
+      } else {
+        this.filteredPosts = this.langPosts;
+      }
+
     },
 
     checkEmpty: function() {
@@ -523,7 +617,19 @@ export default {
     filterByTemplate: function() {
       if (this.templates.length !== 0) {
         this.templatePosts = [];
-        this.departmentPosts.forEach((post) => {
+        var tempPosts = [];
+        if (this.templates.indexOf("archived") > -1 && this.templates.length == 1) {
+          this.templatePosts = this.departmentPosts.filter(x =>
+            x.archived == true);
+          return;
+        } else if (this.templates.indexOf("archived") > -1){
+          tempPosts = this.departmentPosts.filter(x =>
+            x.archived == true);
+        } else {
+          tempPosts = this.departmentPosts;
+        }
+        
+        tempPosts.forEach((post) => {
           if (this.templates.includes(post.template)) {
             this.templatePosts.push(post);
           }
@@ -542,6 +648,7 @@ export default {
       await this.filterBySearch();
       await this.filterByDate();
       await this.filterByTag();
+      await this.filterByLanguage();
       await this.checkEmpty();
     },
 
@@ -563,6 +670,7 @@ export default {
       this.end = '';
       this.department = '';
       this.tag = '';
+      this.language = '';
       this.resetRouterQuery();
       this.filteredPosts = this.posts;
       this.currentSort = 'date';
@@ -615,6 +723,15 @@ export default {
               unixValue = new Date(unixValue * 1000);
               Vue.set(this, routerKey, unixValue);
             }
+          } else if (routerKey == "language") {
+
+            let setLang = this.languages.filter(langObj => {
+              return langObj.langCode == this.$route.query[routerKey]; 
+            });
+            console.log(setLang[0]);
+            this.language = setLang[0];
+
+            // Vue.set(this, routerKey, this.$route.query[routerKey]);
           } else {
             Vue.set(this, routerKey, this.$route.query[routerKey]);
           }
@@ -664,7 +781,7 @@ export default {
         name: 'main',
         query: this.routerQuery,
       }).catch(e => {
-        // window.console.log(e);
+        window.console.log(e);
       });
     },
   },
@@ -706,7 +823,7 @@ tr td:last-child {
 .filter-by-owner{
   font-family:"Open Sans", Helvetica, Roboto, Arial, sans-serif !important;
 }
-.filter-by-owner .v-select .vs__dropdown-toggle{
+.filter-by-owner .v-select .vs__dropdown-toggle {
   border:none;
   background:white;
 }
@@ -732,7 +849,7 @@ tr td:last-child {
 
 .vs__selected {
   position: absolute;
-
+  z-index: 10;
 }
 .vs__clear:hover {
   background-color: transparent;
@@ -742,6 +859,16 @@ tr td:last-child {
   border-radius: 0;
   padding:0;
 }
+
+.v-select .vs__dropdown-toggle{
+  border-radius: 0;
+  padding:0;
+}
+
+#dept-filter .v-select .vs__dropdown-menu{
+ width: 400px;
+}
+
 .filter-by-owner .v-select input[type=search],
 .v-select input[type=search]:focus{
   border:none;
@@ -772,6 +899,13 @@ tr td:last-child {
   background: white;
   cursor: pointer;
 }
+.vdp-datepicker__calendar span.prev.disabled {
+    display: inline-block !important;
+  }
+
+  .vdp-datepicker__calendar span.next.disabled {
+    display: inline-block !important;
+  }
 #archive-results .vdp-datepicker__calendar .cell.selected,
 #archive-results .vdp-datepicker__calendar .cell.selected.highlighted,
 #archive-results .vdp-datepicker__calendar .cell.selected:hover {
@@ -781,6 +915,14 @@ tr td:last-child {
 .vs__dropdown-option--highlight.vs__dropdown-option{
   background: #0f4d90;
   color: white;
+}
+.archived-tag {
+  background-color: #444;
+  display: inline;
+  color: white;
+  padding: 3px 10px;
+  font-weight: bold;
+  margin-right: 1rem;
 }
 
 @media screen and (max-width: 750px) {
@@ -794,6 +936,14 @@ tr td:last-child {
   .cell.medium-auto.filter-box {
     width: 40%;
   }
-}
 
+  .filter-by-owner {
+    width: 90% !important;
+  }
+  .archived-tag {
+    display: block;
+    width: fit-content;
+    margin-bottom: 1rem;
+  }
+}
 </style>

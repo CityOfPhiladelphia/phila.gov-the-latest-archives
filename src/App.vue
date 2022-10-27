@@ -181,9 +181,7 @@
               <span
                 v-if="post.archived"
                 class="archived-tag"
-              >
-                Archived
-              </span>
+              >Archived</span>
               <a
                 :href="post.link"
                 target="_blank"
@@ -379,11 +377,11 @@ export default {
         ],
       },
       templatesList: {
-        featured: "Featured",
         post: "Posts",
-        archived: "Archived",
-        action_guide: "Action guides",
         press_release: "Press releases",
+        action_guide: "Action guides",
+        featured: "Featured",
+        archived: "Archived",
       },
 
       disabledStartDate: {
@@ -918,6 +916,14 @@ tr td:last-child {
   background: #0f4d90;
   color: white;
 }
+.archived-tag {
+  background-color: #444;
+  display: inline;
+  color: white;
+  padding: 3px 10px;
+  font-weight: bold;
+  margin-right: 1rem;
+}
 
 @media screen and (max-width: 750px) {
   .search, .pam, .table-container {
@@ -934,16 +940,10 @@ tr td:last-child {
   .filter-by-owner {
     width: 90% !important;
   }
+  .archived-tag {
+    display: block;
+    width: fit-content;
+    margin-bottom: 1rem;
+  }
 }
-
-.archived-tag {
-  background-color: #444;
-  display: inline;
-  color: white;
-  padding: 3px 10px;
-  font-weight: bold;
-  vertical-align: text-bottom;
-  margin-right: 3px;
-}
-
 </style>

@@ -916,13 +916,18 @@ tr td:last-child {
   background: #0f4d90;
   color: white;
 }
-.archived-tag {
-  background-color: #444;
-  display: inline;
-  color: white;
-  padding: 3px 10px;
-  font-weight: bold;
-  margin-right: 1rem;
+#archives {
+  .title {
+    .archived-tag {
+      background-color: #444;
+      display: inline;
+      color: white;
+      padding: 3px 10px;
+      font-weight: bold;
+      margin-right: 1rem;
+      vertical-align: baseline;
+    }
+  }
 }
 
 @media screen and (max-width: 750px) {
@@ -940,10 +945,14 @@ tr td:last-child {
   .filter-by-owner {
     width: 90% !important;
   }
-  .archived-tag {
-    display: block;
-    width: fit-content;
-    margin-bottom: 1rem;
+  #archives {
+    .title {
+      .archived-tag {
+        display: block;
+        width: fit-content;
+        margin-bottom: 1rem;
+      }
+    }
   }
 }
 </style>

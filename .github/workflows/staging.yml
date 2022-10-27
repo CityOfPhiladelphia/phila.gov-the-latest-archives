@@ -16,7 +16,7 @@ jobs:
       - name: Build program project files
         run: |
           npm install
-          npm run build
+          npm run build:staging
       - name: Deploy to s3
         env: 
             AWS_DEFAULT_REGION: us-east-1

@@ -237,8 +237,7 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-const endpoint = process.env.API_ENDPOINT;
-console.log(process.env);
+const endpoint = process.env.VUE_APP_API_ENDPOINT;
 export default {
   name: "Archives",
   components: { 

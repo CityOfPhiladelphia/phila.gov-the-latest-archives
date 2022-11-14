@@ -949,6 +949,7 @@ tr td:last-child {
         display: block;
         width: fit-content;
         margin-bottom: 1rem;
+        margin-top: 0.5rem;
       }
     }
   }

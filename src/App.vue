@@ -492,9 +492,9 @@ export default {
       {
         axios
           .get("https://f468q68a64.execute-api.us-east-1.amazonaws.com/archives", {
-            params: {
-              count: -1,
-            },
+            // params: {
+            //   count: -1,
+            // },
           })
           .then(response => {
             this.posts = response.data;

@@ -491,7 +491,7 @@ export default {
     getAllPosts: function() {
       {
         axios
-          .get(endpoint + "archives", {
+          .get("https://f468q68a64.execute-api.us-east-1.amazonaws.com/archives", {
             params: {
               count: -1,
             },
@@ -517,7 +517,7 @@ export default {
     getAllCategories: function() {
       {
         axios
-          .get(endpoint + "categories")
+          .get("https://5qhhwx9fd4.execute-api.us-east-1.amazonaws.com/categories")
           .then(response => {
             this.endpointCategories = response.data;
           })

@@ -178,6 +178,10 @@
             @click.stop.prevent="goToPost(post.link)"
           >
             <td class="title">
+              <span
+                v-if="post.archived"
+                class="archived-tag"
+              >Archived</span>
               <a
                 :href="post.link"
                 target="_blank"
@@ -233,10 +237,8 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-// const endpoint =
-//   "https://cors-anywhere.herokuapp.com/phila.gov/wp-json/the-latest/v1/";
-
-const endpoint = "https://api.phila.gov/phila/the-latest/v1/";
+// const endpoint = "https://api.phila.gov/phila/the-latest/v1/";
+const endpoint = "https://staging-admin.phila.gov/wp-json/the-latest/v1/";
 
 export default {
   name: "Archives",
@@ -365,7 +367,6 @@ export default {
       start: '',
       end: '',
       language: '',
-      
       searchOptions: {
         shouldSort: false, 
         threshold: 0.5, 
@@ -375,30 +376,13 @@ export default {
           'tags.name',
         ],
       },
-      tagOptions: {
-        shouldSort: false,
-        threshold: 0.0,
-        keys: [
-          'tags.name',
-          'tags.slug',
-        ],
-      },
-      templateOptions: {
-        shouldSort: false,
-        threshold: 0.0, 
-        keys: [
-          'template',
-        ],
-      },
-
       templatesList: {
-        featured: "Featured",
         post: "Posts",
-        action_guide: "Action guides",
         press_release: "Press releases",
+        action_guide: "Action guides",
+        featured: "Featured",
+        archived: "Archived",
       },
-
-      
 
       disabledStartDate: {
         from: new Date(Date.now()),
@@ -550,7 +534,7 @@ export default {
   
 
     filterByTag: function () {
-      if (this.tag !== '') { // there is nothing in the tag URL
+      if (this.tag !== '') { // there is nothing in the tag query of the URL
         this.langPosts = [];
         //need to filter out posts that have no tags
         let tempPosts = this.tagPosts.filter(x=>x.tags[0] !== false );
@@ -563,11 +547,6 @@ export default {
     filterByLanguage: function() {
       if (this.language) {
         this.filteredPosts = [];
-        // let selectedLang = this.languages.filter(langObj => {
-        //   return langObj.langName == this.langauge; 
-        // });
-
-        // console.log(selectedLang);
         this.filteredPosts = this.langPosts.filter(post => {
           return post.language == this.language.langCode;
         });
@@ -638,7 +617,19 @@ export default {
     filterByTemplate: function() {
       if (this.templates.length !== 0) {
         this.templatePosts = [];
-        this.departmentPosts.forEach((post) => {
+        var tempPosts = [];
+        if (this.templates.indexOf("archived") > -1 && this.templates.length == 1) {
+          this.templatePosts = this.departmentPosts.filter(x =>
+            x.archived == true);
+          return;
+        } else if (this.templates.indexOf("archived") > -1){
+          tempPosts = this.departmentPosts.filter(x =>
+            x.archived == true);
+        } else {
+          tempPosts = this.departmentPosts;
+        }
+        
+        tempPosts.forEach((post) => {
           if (this.templates.includes(post.template)) {
             this.templatePosts.push(post);
           }
@@ -925,6 +916,19 @@ tr td:last-child {
   background: #0f4d90;
   color: white;
 }
+#archives {
+  .title {
+    .archived-tag {
+      background-color: #444;
+      display: inline;
+      color: white;
+      padding: 3px 10px;
+      font-weight: bold;
+      margin-right: 1rem;
+      vertical-align: baseline;
+    }
+  }
+}
 
 @media screen and (max-width: 750px) {
   .search, .pam, .table-container {
@@ -941,6 +945,14 @@ tr td:last-child {
   .filter-by-owner {
     width: 90% !important;
   }
+  #archives {
+    .title {
+      .archived-tag {
+        display: block;
+        width: fit-content;
+        margin-bottom: 1rem;
+      }
+    }
+  }
 }
-
 </style>

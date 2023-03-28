@@ -1,6 +1,3 @@
-import BrowserSupport from  "./browser-support.js";
-BrowserSupport.isIE();
-
 import Vue from 'vue';
 import App from './App.vue';
 import VueRouter from 'vue-router';

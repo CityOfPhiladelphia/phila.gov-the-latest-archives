@@ -237,8 +237,7 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-// const endpoint = "https://api.phila.gov/phila/the-latest/v1/";
-const endpoint = "https://staging-admin.phila.gov/wp-json/the-latest/v1/";
+const endpoint = "https://api.phila.gov/posts-archive/";
 
 export default {
   name: "Archives",
@@ -475,7 +474,7 @@ export default {
     getAllPosts: function() {
       {
         axios
-          .get("https://6qffp764ob.execute-api.us-east-1.amazonaws.com/", {
+          .get(endpoint, {
             // params: {
             //   count: -1,
             // },

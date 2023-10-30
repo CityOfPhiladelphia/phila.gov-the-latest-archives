@@ -473,10 +473,10 @@ export default {
     getAllPosts: function() {
       {
         axios
-          .get(endpoint + "archives", {
-            params: {
-              count: -1,
-            },
+          .get(endpoint, {
+            // params: {
+            //   count: -1,
+            // },
           })
           .then(response => {
             this.posts = response.data;
@@ -499,7 +499,7 @@ export default {
     getAllCategories: function() {
       {
         axios
-          .get(endpoint + "categories")
+          .get("https://6rlex3rcs5.execute-api.us-east-1.amazonaws.com/")
           .then(response => {
             this.endpointCategories = response.data;
           })
@@ -776,7 +776,6 @@ export default {
         return;
       } 
       this.$router.push({
-        name: 'main',
         query: this.routerQuery,
       }).catch(e => {
         window.console.log(e);

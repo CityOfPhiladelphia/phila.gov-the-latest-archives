@@ -8,15 +8,16 @@ jobs:
     name: Build files
     runs-on: ubuntu-latest
     steps: 
+      - uses: actions/checkout@master
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with: 
-            node-version: '16.x'
-      - uses: actions/checkout@main
-      - name: Build program project files
+            node-version: 16
+            cache: 'npm'
+      - name: Build project files
         run: |
-          npm install
-          npm run build:staging
+          npm ci
+          npm run build
       - name: Deploy to s3
         env: 
             AWS_DEFAULT_REGION: us-east-1

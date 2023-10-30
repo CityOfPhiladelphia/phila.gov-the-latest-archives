@@ -2,7 +2,7 @@ name: Deploy to s3
 on:
   push:
     branches:
-      - test
+      - main
 jobs:
   build:
     name: Build files
@@ -24,4 +24,4 @@ jobs:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run:
-          aws s3 cp dist s3://philagov-vue-apps/the-latest-archive/test/ --recursive
+          aws s3 cp dist s3://philagov-vue-apps/the-latest-archive/production/ --recursive

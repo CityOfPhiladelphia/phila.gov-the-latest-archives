@@ -181,9 +181,7 @@
               <span
                 v-if="post.archived"
                 class="archived-tag"
-              >
-                Archived
-              </span>
+              >Archived</span>
               <a
                 :href="post.link"
                 target="_blank"
@@ -239,8 +237,7 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-// const endpoint = "https://api.phila.gov/phila/the-latest/v1/";
-const endpoint = "https://staging-admin.phila.gov/wp-json/the-latest/v1/";
+const endpoint = "https://api.phila.gov/posts-archive/";
 
 export default {
   name: "Archives",
@@ -379,11 +376,11 @@ export default {
         ],
       },
       templatesList: {
-        featured: "Featured",
         post: "Posts",
-        archived: "Archived",
-        action_guide: "Action guides",
         press_release: "Press releases",
+        action_guide: "Action guides",
+        featured: "Featured",
+        archived: "Archived",
       },
 
       disabledStartDate: {
@@ -477,10 +474,10 @@ export default {
     getAllPosts: function() {
       {
         axios
-          .get(endpoint + "archives", {
-            params: {
-              count: -1,
-            },
+          .get(endpoint, {
+            // params: {
+            //   count: -1,
+            // },
           })
           .then(response => {
             this.posts = response.data;
@@ -503,7 +500,7 @@ export default {
     getAllCategories: function() {
       {
         axios
-          .get(endpoint + "categories")
+          .get("https://6rlex3rcs5.execute-api.us-east-1.amazonaws.com/")
           .then(response => {
             this.endpointCategories = response.data;
           })
@@ -780,7 +777,6 @@ export default {
         return;
       } 
       this.$router.push({
-        name: 'main',
         query: this.routerQuery,
       }).catch(e => {
         window.console.log(e);
@@ -918,6 +914,19 @@ tr td:last-child {
   background: #0f4d90;
   color: white;
 }
+#archives {
+  .title {
+    .archived-tag {
+      background-color: #444;
+      display: inline;
+      color: white;
+      padding: 3px 10px;
+      font-weight: bold;
+      margin-right: 1rem;
+      vertical-align: baseline;
+    }
+  }
+}
 
 @media screen and (max-width: 750px) {
   .search, .pam, .table-container {
@@ -934,16 +943,14 @@ tr td:last-child {
   .filter-by-owner {
     width: 90% !important;
   }
+  #archives {
+    .title {
+      .archived-tag {
+        display: block;
+        width: fit-content;
+        margin-bottom: 1rem;
+      }
+    }
+  }
 }
-
-.archived-tag {
-  background-color: #444;
-  display: inline;
-  color: white;
-  padding: 3px 10px;
-  font-weight: bold;
-  vertical-align: text-bottom;
-  margin-right: 3px;
-}
-
 </style>

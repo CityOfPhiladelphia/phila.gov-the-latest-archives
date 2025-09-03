@@ -237,7 +237,7 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-const endpoint = "https://api.phila.gov/posts-archive/";
+const endpoint = process.env.VUE_APP_API_ENDPOINT;
 
 export default {
   name: "Archives",
@@ -949,6 +949,7 @@ tr td:last-child {
         display: block;
         width: fit-content;
         margin-bottom: 1rem;
+        margin-top: 0.5rem;
       }
     }
   }

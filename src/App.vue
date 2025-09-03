@@ -238,6 +238,7 @@ Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
 const endpoint = process.env.VUE_APP_API_ENDPOINT;
+
 export default {
   name: "Archives",
   components: { 

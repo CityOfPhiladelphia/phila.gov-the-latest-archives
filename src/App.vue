@@ -237,7 +237,7 @@ import Datepicker from 'vuejs-datepicker';
 Vue.use(VuePaginate);
 Vue.use(VueFuse);
 
-const endpoint = "https://api.phila.gov/posts-archive/";
+const endpoint = "https://muuljp5pva.execute-api.us-east-1.amazonaws.com/";
 
 export default {
   name: "Archives",
